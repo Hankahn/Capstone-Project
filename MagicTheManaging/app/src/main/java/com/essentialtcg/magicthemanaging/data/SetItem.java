@@ -1,11 +1,14 @@
 package com.essentialtcg.magicthemanaging.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Date;
 
 /**
  * Created by Shawn on 4/4/2016.
  */
-public class SetItem {
+public class SetItem implements Parcelable {
 
     private int id;
     private String name;
@@ -20,6 +23,26 @@ public class SetItem {
     private boolean onlineOnly;
     private String booster;
     private boolean firstSet;
+
+    public SetItem() {
+
+    }
+
+    public SetItem(Parcel source) {
+        id = source.readInt();
+        name = source.readString();
+        code = source.readString();
+        gathererCode = source.readString();
+        oldCode = source.readString();
+        magicCardsInfoCode = source.readString();
+        releaseDate = source.readString();
+        border = source.readString();
+        setType = source.readString();
+        block = source.readString();
+        onlineOnly = source.readByte() != 0;
+        booster = source.readString();
+        firstSet = source.readByte() != 0;
+    }
 
     public int getId() {
         return id;
@@ -124,5 +147,46 @@ public class SetItem {
     public void setFirstSet(boolean firstSet) {
         this.firstSet = firstSet;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeString(code);
+        dest.writeString(gathererCode);
+        dest.writeString(oldCode);
+        dest.writeString(magicCardsInfoCode);
+        dest.writeString(releaseDate);
+        dest.writeString(border);
+        dest.writeString(setType);
+        dest.writeString(block);
+        dest.writeByte((byte) (onlineOnly == true ? 1 : 0));
+        dest.writeString(booster);
+        dest.writeByte((byte) (firstSet == true ? 1 : 0));
+    }
+
+    public static final Parcelable.Creator<SetItem> CREATOR
+            = new Parcelable.ClassLoaderCreator<SetItem>() {
+
+        @Override
+        public SetItem createFromParcel(Parcel source) {
+            return new SetItem(source);
+        }
+
+        @Override
+        public SetItem[] newArray(int size) {
+            return new SetItem[size];
+        }
+
+        @Override
+        public SetItem createFromParcel(Parcel source, ClassLoader loader) {
+            return new SetItem(source);
+        }
+    };
 
 }

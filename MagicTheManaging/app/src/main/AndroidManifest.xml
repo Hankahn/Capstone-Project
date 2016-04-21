@@ -14,6 +14,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".SearchActivity"
             android:label="@string/app_name"
@@ -24,6 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".CardViewActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <provider android:name=".data.CardProvider"
             android:authorities="com.essentialtcg.magicthemanaging.cards"

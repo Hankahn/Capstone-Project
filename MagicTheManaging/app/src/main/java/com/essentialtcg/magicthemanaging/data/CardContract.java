@@ -1,8 +1,6 @@
 package com.essentialtcg.magicthemanaging.data;
 
 import android.net.Uri;
-import android.text.TextUtils;
-import android.util.Log;
 
 public class CardContract {
 
@@ -24,12 +22,24 @@ public class CardContract {
         String NAME2 = "card2.Name";
         String MANA_COST = "card.ManaCost";
         String MANA_COST2 = "card2.ManaCost";
+        String CARD_TEXT = "card.CardText";
+        String CARD_TEXT2 = "card2.CardText";
         String TYPE = "card.CardType";
+        String TYPE2 = "card2.CardType";
         String POWER = "card.power";
+        String POWER2 = "card2.power";
         String TOUGHNESS = "card.Toughness";
+        String TOUGHNESS2 = "card2.Toughness";
         String LOYALTY = "card.Loyalty";
+        String LOYALTY2 = "card2.Loyalty";
         String SET_CODE = "card.SetCode";
         String RARITY = "card.Rarity";
+        String CARD_NUMBER = "card.CardNumber";
+        String CARD_NUMBER2 = "card2.CardNumber";
+        String IMAGE_NAME = "card.ImageName";
+        String IMAGE_NAME2 = "card2.ImageName";
+        String FLAVOR_TEXT = "card.Flavor";
+        String FLAVOR_TEXT2 = "card2.Flavor";
 
     }
 

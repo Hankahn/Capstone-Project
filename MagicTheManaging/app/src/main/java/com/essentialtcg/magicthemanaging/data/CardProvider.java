@@ -81,6 +81,7 @@ public class CardProvider extends ContentProvider {
         if (cursor != null) {
             cursor.setNotificationUri(getContext().getContentResolver(), uri);
         }
+
         return cursor;
     }
 
@@ -134,9 +135,9 @@ public class CardProvider extends ContentProvider {
             case CARD__ID: {
                 final String _id = paths.get(1);
 
-                builder.table(Tables.CARD_FULL).where(" (" + CardContract.CardColumns.NAMES +
+                /*builder.table(Tables.CARD_FULL).where(" (" + CardContract.CardColumns.NAMES +
                         " LIKE " + CardContract.CardColumns.NAME + " || '%' OR " +
-                        CardContract.CardColumns.NAMES + " = '')");
+                        CardContract.CardColumns.NAMES + " = '')");*/
 
                 return builder.table(Tables.CARD_FULL).where(CardContract.CardColumns._ID +
                         "=?", _id);

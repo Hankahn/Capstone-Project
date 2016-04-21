@@ -1,26 +1,29 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SetPickerDialogFragment">
+    tools:context=".SetPickerDialogFragment">-->
 
     <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".SetPickerDialogFragment">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sets"
+            android:text="@string/SET_PICKER_DIALOG_TITLE"
             android:textStyle="bold"
             android:layout_margin="@dimen/search_list_item_vertical_margin" />
 
         <View android:id="@+id/separator"
             android:background="#000000"
             android:layout_width = "fill_parent"
-            android:layout_height="1dp"
-            android:layout_centerVertical ="true" />
+            android:layout_height="1dp" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/set_picker_recycler_view"
@@ -29,4 +32,4 @@
 
     </LinearLayout>
 
-</FrameLayout>
+<!--</FrameLayout>-->

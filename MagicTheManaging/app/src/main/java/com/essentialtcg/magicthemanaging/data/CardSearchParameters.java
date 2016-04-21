@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 
+import com.essentialtcg.magicthemanaging.utils.SetArrayList;
+
 /**
  * Created by Shawn on 3/26/2016.
  */
@@ -12,7 +14,7 @@ public class CardSearchParameters implements Parcelable {
 
     private String nameFilter;
     private String textFilter;
-    private ArrayList<SetItem> setFilter;
+    private SetArrayList setFilter;
     private ArrayList<String> formatFilter;
     private ArrayList<String> colorFilter;
     private ArrayList<String> typeFilter;
@@ -37,11 +39,11 @@ public class CardSearchParameters implements Parcelable {
         this.textFilter = textFilter;
     }
 
-    public ArrayList<SetItem> getSetFilter() {
+    public SetArrayList getSetFilter() {
         return setFilter;
     }
 
-    public void setSetFilter(ArrayList<SetItem> setFilter) {
+    public void setSetFilter(SetArrayList setFilter) {
         this.setFilter = setFilter;
     }
 
@@ -107,7 +109,8 @@ public class CardSearchParameters implements Parcelable {
 
     public CardSearchParameters(Parcel source) {
         nameFilter = source.readString();
-        source.readList(setFilter, null);
+        setFilter = new SetArrayList();
+        source.readList(setFilter, SetItem.class.getClassLoader());
     }
 
     @Override
@@ -136,8 +139,9 @@ public class CardSearchParameters implements Parcelable {
 
         @Override
         public CardSearchParameters createFromParcel(Parcel source, ClassLoader loader) {
-            return null;
+            return new CardSearchParameters(source);
         }
+
     };
 
 }

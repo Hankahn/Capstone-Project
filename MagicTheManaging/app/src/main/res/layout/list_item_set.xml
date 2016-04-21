@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
     android:orientation="vertical">
 
     <LinearLayout
@@ -12,13 +13,14 @@
         android:layout_margin="@dimen/search_list_item_vertical_margin">
 
         <ImageView
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:src="@mipmap/bfz_common"
+            android:id="@+id/set_picker_set_image_view"
+            android:layout_width="@dimen/SET_PICKER_SET_ICON_WIDTH"
+            android:layout_height="@dimen/SET_PICKER_SET_ICON_HEIGHT"
             android:baselineAlignBottom="true"
             android:layout_gravity="center"
             android:layout_marginRight="@dimen/search_list_item_vertical_margin"
-            android:layout_marginEnd="@dimen/search_list_item_vertical_margin" />
+            android:layout_marginEnd="@dimen/search_list_item_vertical_margin"
+            android:contentDescription="@string/SET_ICON_DEFAULT_CONTENT_DESCRIPTION" />
 
         <TextView
             android:id="@+id/set_name_text_view"
@@ -28,21 +30,20 @@
             android:textAppearance="?android:textAppearanceListItem"
             android:textStyle="bold"
             android:layout_weight="1"
-            tools:text="Shadows Over Innistrad" />
+            tools:cardText="Shadows Over Innistrad" />
 
         <CheckBox
             android:id="@+id/set_picker_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|right|end"
-            android:gravity="right" />
+            android:layout_gravity="center|end"
+            android:gravity="end" />
 
     </LinearLayout>
 
     <View android:id="@+id/separator"
         android:background="#000000"
         android:layout_width = "fill_parent"
-        android:layout_height="1dp"
-        android:layout_centerVertical ="true" />
+        android:layout_height="1dp" />
 
 </LinearLayout>
