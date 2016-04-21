@@ -1,11 +1,14 @@
 package com.essentialtcg.magicthemanaging;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.database.Cursor;
@@ -18,7 +21,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,15 +35,20 @@ import android.widget.TextView;
 import com.essentialtcg.magicthemanaging.data.CardLoader;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.data.SetItem;
+import com.essentialtcg.magicthemanaging.utils.SetArrayList;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class SearchFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>,
-        SetPickerDialogFragment.SetPickerDialogFragmentListener {
+public class SearchFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+        SetPickerDialogFragment.SetPickerDialogFragmentListener,
+        RecyclerViewClickListener {
 
     private final String SEARCH_PARAMETERS_TAG = "SEARCH_PARAMETERS";
     private final String SEARCH_RESULTS_POSITION_TAG = "SEARCH_RESULTS_POSITION";
@@ -69,12 +76,12 @@ public class SearchFragment extends Fragment implements
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.search_toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.card_recycler_view);
         mEmptyResultTextView = (TextView) rootView.findViewById(R.id.empty_reset_text_view);
-        mBottomSheet = rootView.findViewById(R.id.bottom_sheet);
+        mBottomSheet = rootView.findViewById(R.id.searc_bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
         mNameFilterEditText = (EditText) rootView.findViewById(R.id.name_filter_edit_text);
         mSetFilterEditText = (EditText) rootView.findViewById(R.id.set_filter_edit_text);
@@ -88,7 +95,23 @@ public class SearchFragment extends Fragment implements
             mSearchParameters = savedInstanceState.getParcelable(SEARCH_PARAMETERS_TAG);
         } else {
             mSearchParameters = new CardSearchParameters();
+
+            SetArrayList setFilter = new SetArrayList();
+            SetItem setItem = new SetItem();
+            setItem.setName("Oath of the Gatewatch");
+            setItem.setCode("OGW");
+            setFilter.add(setItem);
+
+            mSearchParameters.setSetFilter(setFilter);
+
             mPosition = 0;
+        }
+
+        mNameFilterEditText.setText(mSearchParameters.getNameFilter());
+
+        if (mSearchParameters.getSetFilter() != null &&
+                mSearchParameters.getSetFilter().size() > 0) {
+            mSetFilterEditText.setText(mSearchParameters.getSetFilter().toString());
         }
 
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -110,20 +133,11 @@ public class SearchFragment extends Fragment implements
             }
         });
 
-        /*mNameFilterEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)
-                        getActivity().getSystemService(((AppCompatActivity) getActivity()).INPUT_METHOD_SERVICE);
-
-                imm.showSoftInput(mNameFilterEditText, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });*/
-
         mSetFilterEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SetPickerDialogFragment setPickerFragment = new SetPickerDialogFragment();
+                SetPickerDialogFragment setPickerFragment =
+                        SetPickerDialogFragment.newInstance(mSearchParameters);
                 setPickerFragment.setTargetFragment(mFragment, SET_PICKER_RESULTS);
                 setPickerFragment.show(getFragmentManager(), "Set Picker");
             }
@@ -134,13 +148,57 @@ public class SearchFragment extends Fragment implements
             public void onClick(View v) {
                 mSearchParameters.setNameFilter(mNameFilterEditText.getText().toString());
 
+                mNameFilterEditText.clearFocus();
+
+                Util.hideSoftKeyboard(getActivity());
+
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                mBottomSheet.setVisibility(View.INVISIBLE);
+
                 mPosition = 0;
 
                 LoadData();
             }
         });
 
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(new EmptyRecyclerView());
+
         LoadData();
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setExitSharedElementCallback(new SharedElementCallback() {
+                @Override
+                public void onMapSharedElements(List<String> names,
+                                                Map<String, View> sharedElements) {
+                    /*if(mReenterState != null) {
+                        int startPosition = mReenterState.getInt(STARTING_ARTICLE_POSITION);
+                        int currentPosition = mReenterState.getInt(CURRENT_ARTICLE_POSITION);
+
+                        if(startPosition != currentPosition) {
+                            String updatedTransitionName =
+                                    String.valueOf(
+                                            mRecyclerView.getAdapter().getItemId(currentPosition));
+                            View updatedSharedElement =
+                                    mRecyclerView.findViewWithTag(updatedTransitionName);
+
+                            Log.d("Heck4", "Updated transition name " + updatedTransitionName);
+
+                            if(updatedSharedElement != null) {
+                                Log.d("Heck4", "Shared element found " + updatedTransitionName);
+                                names.clear();
+                                names.add(updatedTransitionName);
+                                sharedElements.clear();
+                                sharedElements.put(updatedTransitionName, updatedSharedElement);
+                            }
+                        }
+
+                        mReenterState = null;
+                    }*/
+                }
+            });
+        }
+
 
         return rootView;
     }
@@ -152,7 +210,7 @@ public class SearchFragment extends Fragment implements
         int position = 0;
 
         try {
-            ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+            position = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
                     .findFirstVisibleItemPosition();
 
         } catch (Exception ex) {
@@ -164,21 +222,9 @@ public class SearchFragment extends Fragment implements
     }
 
     @Override
-    public void onReturnValue(ArrayList<SetItem> selectedSets) {
+    public void onReturnValue(SetArrayList selectedSets) {
         mSearchParameters.setSetFilter(selectedSets);
-
-        StringBuilder selectedSetsText = new StringBuilder();
-
-        for (SetItem set : selectedSets) {
-            if(selectedSetsText.length() > 0) {
-                selectedSetsText.append(" or ");
-            }
-
-            selectedSetsText.append(set.getName());
-        }
-
-        mSetFilterEditText.setText(selectedSetsText.toString());
-
+        mSetFilterEditText.setText(selectedSets.toString());
     }
 
     @Override
@@ -199,14 +245,14 @@ public class SearchFragment extends Fragment implements
         /*ArrayList<CardItem> cardItems = CardTransform.transform(cursor);
 
         RecyclerAdapter adapter = new RecyclerAdapter(cardItems);*/
-        RecyclerAdapter adapter = new RecyclerAdapter(cursor);
+        SearchResultsRecyclerAdapter adapter = new SearchResultsRecyclerAdapter(cursor, this);
 
         adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         layoutManager.scrollToPosition(mPosition);
         mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -238,12 +284,45 @@ public class SearchFragment extends Fragment implements
             }
         };
 
-    private class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
+    @Override
+    public void recyclerViewItemClicked(View view, int position) {
+        Intent viewCardIntent = new Intent(getActivity(), CardViewActivity.class);
+
+        View croppedImageView = view.findViewById(R.id.cropped_image_view);
+
+        Bundle bundle = null;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            String transitionName = croppedImageView.getTransitionName();
+            bundle = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(
+                            getActivity(),
+                            croppedImageView,
+                            transitionName)
+                    .toBundle();
+        }
+
+        viewCardIntent.putExtra(CardViewActivity.INITIAL_CARD_POSITION, position);
+        viewCardIntent.putExtra(CardViewActivity.SEARCH_PARAMETERS, mSearchParameters);
+
+        startActivity(viewCardIntent, bundle);
+    }
+
+    private class SearchResultsRecyclerAdapter
+            extends RecyclerView.Adapter<SearchResultsRecyclerAdapter.SearchResultViewHolder> {
 
         private Cursor mCursor;
 
-        public RecyclerAdapter(Cursor cursor) {
+        private RecyclerViewClickListener mCardClickListener;
+
+        public SearchResultsRecyclerAdapter(Cursor cursor) {
             mCursor = cursor;
+        }
+
+        public SearchResultsRecyclerAdapter(
+                Cursor cursor, RecyclerViewClickListener cardClickListener) {
+            mCursor = cursor;
+            mCardClickListener = cardClickListener;
         }
 
         @Override
@@ -253,32 +332,40 @@ public class SearchFragment extends Fragment implements
         }
 
         @Override
-        public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        public SearchResultViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
             View view = getActivity().getLayoutInflater().inflate(
                     R.layout.list_item_search_card, parent, false);
-            final ViewHolder vh = new ViewHolder(view);
-            view.setOnClickListener(new View.OnClickListener() {
+            final SearchResultViewHolder viewHolder = new SearchResultViewHolder(view);
+            /*view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Intent viewCardIntent = new Intent(getActivity(), CardViewActivity.class);
 
+                    viewCardIntent.putExtra(CardViewActivity.INITIAL_CARD_POSITION, 0);
+
+                    startActivity(viewCardIntent);
                 }
-            });
+            });*/
 
-            return vh;
+            return viewHolder;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(final SearchResultViewHolder holder, int position) {
             mCursor.moveToPosition(position);
 
             // Clean this up into a function since it will probably be used more than once
-            String imageUrl = "http://www.essentialtcg.com/images/ogw/crops/" +
-                    mCursor.getString(CardLoader.Query.NAME).replace(" ", "%20") +
-                    ".crop.jpg?width=" + String.valueOf(Util.dpToPx(getActivity(), 50));
+            final String imageUrl = "http://www.essentialtcg.com/images/" +
+                    mCursor.getString(CardLoader.Query.SET_CODE) + "/" +
+                    mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20") +
+                    ".jpg?cropyunits=100&cropxunits=100&crop=10,12,90,50&width=" +
+                    String.valueOf(Util.dpToPx(getActivity(), 50));
 
             if (mCursor.getString(CardLoader.Query.NAME2) != null) {
-                holder.nameTextView.setText(mCursor.getString(CardLoader.Query.NAME) +
-                        " / " + mCursor.getString(CardLoader.Query.NAME2));
+                holder.nameTextView.setText(String.format(
+                        getActivity().getResources().getString(R.string.CARD_NAME_DOUBLE_SIDED),
+                        mCursor.getString(CardLoader.Query.NAME),
+                        mCursor.getString(CardLoader.Query.NAME2)));
             } else {
                 holder.nameTextView.setText(mCursor.getString(CardLoader.Query.NAME));
             }
@@ -311,7 +398,7 @@ public class SearchFragment extends Fragment implements
                     Log.e("MtM", ex.toString());
                     holder.setRarityTextView.setText(String.format("%s %s",
                             mCursor.getString(CardLoader.Query.SET_CODE),
-                            mCursor.getString(CardLoader.Query.RARITY)));
+                            mCursor.getString(CardLoader.Query.RARITY).substring(0, 1)));
                 }
             } catch (Exception ex) {
                 Log.d("MtM", mCursor.getString(CardLoader.Query.SET_CODE)
@@ -321,144 +408,31 @@ public class SearchFragment extends Fragment implements
             holder.typeTextView.setText(mCursor.getString(CardLoader.Query.TYPE));
 
             String manaCost = mCursor.getString(CardLoader.Query.MANA_COST);
+            String secondManaCost = mCursor.getString(CardLoader.Query.MANA_COST2);
 
-            LinearLayout manaCostContainer = holder.manaCostContainerView;
+            //LinearLayout manaCostContainer = holder.manaCostContainerView;
 
             if (manaCost.length() > 0) {
-                ArrayList<Integer> icons = CardUtil.parseIcons(
-                        mCursor.getString(CardLoader.Query.MANA_COST));
+                ArrayList<Integer> icons = CardUtil.parseIcons(manaCost);
 
-                manaCostContainer.removeAllViews();
+                ArrayList<Integer> secondIcons = null;
 
-                LinearLayout.LayoutParams params =
-                        new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 15),
-                                Util.dpToPx(getActivity(), 15));
-
-                if (icons.size() > 5) {
-                    params = new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 10),
-                            Util.dpToPx(getActivity(), 10));
+                if (secondManaCost != null && secondManaCost.length() > 0) {
+                    secondIcons = CardUtil.parseIcons(secondManaCost);
                 }
 
-                params.gravity = Gravity.RIGHT;
+                SpannableStringBuilder builder = new SpannableStringBuilder();
 
-                manaCostContainer.setVisibility(View.VISIBLE);
+                int imageHeightdp = 15;//icons.size() > 5 || (secondIcons != null && secondIcons.size() > 0) ?
+                        //10 : 15;
 
-                int milIcon = R.drawable.mana_1000000;
-
-                for (Integer iconId : icons) {
-                    ImageView manaCostImage = new ImageView(getActivity());
-
-                    try {
-                        Drawable manaIconDrawable = getResources().getDrawable(iconId);
-
-                        manaCostImage.setImageDrawable(manaIconDrawable);
-
-                        if (iconId == milIcon) {
-                            LinearLayout.LayoutParams paramsOverride =
-                                    new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 80),
-                                            Util.calculateHeight(
-                                                    manaIconDrawable.getIntrinsicWidth(),
-                                                    manaIconDrawable.getIntrinsicHeight(),
-                                                    Util.dpToPx(getActivity(), 80)
-                                            ));
-
-                            manaCostImage.setLayoutParams(paramsOverride);
-                        } else {
-                            manaCostImage.setLayoutParams(params);
-                        }
-
-                        manaCostContainer.addView(manaCostImage);
-                    } catch (Exception ex) {
-                        Log.e("MtM", mCursor.getString(CardLoader.Query.MANA_COST));
-                    }
-                }
-
-                manaCostContainer.requestLayout();
-            } else {
-                manaCostContainer.removeAllViews();
-            }
-
-            String type = mCursor.getString(CardLoader.Query.TYPE).toLowerCase();
-
-            if (type.startsWith("creature")) {
-                holder.featuredStatTextView.setText(String.format("%s/%s",
-                        mCursor.getString(CardLoader.Query.POWER),
-                        mCursor.getString(CardLoader.Query.TOUGHNESS)));
-            } else if (type.startsWith("planeswalker")) {
-                holder.featuredStatTextView.setText(mCursor.getString(CardLoader.Query.LOYALTY));
-            } else {
-                holder.featuredStatTextView.setText("");
-            }
-
-            PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
-                    .load(imageUrl)
-                    .placeholder(R.mipmap.sample_card_crop)
-                    .into(holder.cropppedImageView);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mCursor.getCount();
-        }
-    }
-
-    /*private class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
-
-        private ArrayList<CardItem> mCardList;
-
-        public RecyclerAdapter(ArrayList<CardItem> cardList) {
-            mCardList = cardList;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return mCardList.get(position).getId();
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
-            View view = getActivity().getLayoutInflater().inflate(
-                    R.layout.list_item_search_card, parent, false);
-            final ViewHolder vh = new ViewHolder(view);
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                }
-            });
-
-            return vh;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            CardItem cardItem = mCardList.get(position);
-
-            // Clean this up into a function since it will probably be used more than once
-            String imageUrl = "http://www.essentialtcg.com/images/ogw/crops/" +
-                    cardItem.getName().replace(" ", "%20") +
-                    ".crop.jpg?width=" + String.valueOf(Util.dpToPx(getActivity(), 50));
-
-            if (cardItem.getSecondName() != null) {
-                holder.nameTextView.setText(
-                        String.format("%s / %s", cardItem.getName(), cardItem.getSecondName()));
-            } else {
-                holder.nameTextView.setText(cardItem.getName());
-            }
-
-            try {
-                int resourceId = CardUtil.parseSetRarity(
-                        cardItem.getSetCode(), cardItem.getRarity());
-
-                try {
-                    Drawable iconDrawable = ContextCompat.getDrawable(getActivity(), resourceId);
-                    int imageHeight = holder.typeTextView.getLineHeight();
+                for(Integer iconId : icons) {
+                    Drawable iconDrawable = ContextCompat.getDrawable(getActivity(), iconId);
+                    int imageHeight = Util.dpToPx(getActivity(), imageHeightdp);
                     int imageWidth = Util.calculateWidth(iconDrawable.getIntrinsicWidth(),
                             iconDrawable.getIntrinsicHeight(), imageHeight);
 
-                    iconDrawable.setBounds(0, 0, imageHeight, imageWidth);
-
-                    SpannableStringBuilder builder = new SpannableStringBuilder();
+                    iconDrawable.setBounds(0, 0, imageWidth, imageHeight);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         builder.append(" ", new ImageSpan(iconDrawable), 0);
@@ -467,118 +441,103 @@ public class SearchFragment extends Fragment implements
                         builder.setSpan(new ImageSpan(iconDrawable),
                                 builder.length() - 1, builder.length(), 0);
                     }
-
-                    holder.setRarityTextView.setText(builder);
-                } catch (Exception ex) {
-                    Log.e("MtM", ex.toString());
-                    holder.setRarityTextView.setText(String.format("%s %s",
-                            cardItem.getSetCode(), cardItem.getRarity()));
-                }
-            } catch (Exception ex) {
-                Log.d("MtM", cardItem.getSetCode() + "_" + cardItem.getRarity());
-            }
-
-            holder.typeTextView.setText(cardItem.getType());
-
-            String manaCost = cardItem.getManaCost();
-
-            LinearLayout manaCostContainer = holder.manaCostContainerView;
-
-            if (manaCost.length() > 0) {
-                ArrayList<Integer> icons = CardUtil.parseIcons(cardItem.getManaCost());
-
-                manaCostContainer.removeAllViews();
-
-                LinearLayout.LayoutParams params =
-                        new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 15),
-                                Util.dpToPx(getActivity(), 15));
-
-                if (icons.size() > 5) {
-                    params = new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 10),
-                            Util.dpToPx(getActivity(), 10));
                 }
 
-                params.gravity = Gravity.RIGHT;
+                if (secondIcons != null && secondIcons.size() > 0) {
+                    builder.append("/");
+                    for (Integer iconId : secondIcons) {
+                        Drawable iconDrawable = ContextCompat.getDrawable(getActivity(), iconId);
+                        int imageHeight = Util.dpToPx(getActivity(), imageHeightdp);
+                        int imageWidth = Util.calculateWidth(iconDrawable.getIntrinsicWidth(),
+                                iconDrawable.getIntrinsicHeight(), imageHeight);
 
-                manaCostContainer.setVisibility(View.VISIBLE);
+                        iconDrawable.setBounds(0, 0, imageWidth, imageHeight);
 
-                int milIcon = R.drawable.mana_1000000;
-
-                for (Integer iconId : icons) {
-                    ImageView manaCostImage = new ImageView(getActivity());
-
-                    try {
-                        Drawable manaIconDrawable = getResources().getDrawable(iconId);
-
-                        manaCostImage.setImageDrawable(manaIconDrawable);
-
-                        if (iconId == milIcon) {
-                            LinearLayout.LayoutParams paramsOverride =
-                                    new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 80),
-                                            Util.calculateHeight(
-                                                    manaIconDrawable.getIntrinsicWidth(),
-                                                    manaIconDrawable.getIntrinsicHeight(),
-                                                    Util.dpToPx(getActivity(), 80)
-                                            ));
-
-                            manaCostImage.setLayoutParams(paramsOverride);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            builder.append(" ", new ImageSpan(iconDrawable), 0);
                         } else {
-                            manaCostImage.setLayoutParams(params);
+                            builder.append(" ");
+                            builder.setSpan(new ImageSpan(iconDrawable),
+                                    builder.length() - 1, builder.length(), 0);
                         }
-
-                        manaCostContainer.addView(manaCostImage);
-                    } catch (Exception ex) {
-                        Log.e("MtM", cardItem.getManaCost());
                     }
                 }
 
-                manaCostContainer.requestLayout();
+                holder.manaCostTextView.setText(builder);
+
             } else {
-                manaCostContainer.removeAllViews();
+                holder.manaCostTextView.setText("");
             }
 
-            String type = cardItem.getType().toLowerCase();
+            String type = mCursor.getString(CardLoader.Query.TYPE).toLowerCase();
 
-            if (type.startsWith("creature")) {
-                holder.featuredStatTextView.setText(String.format("%s/%s",
-                        cardItem.getPower(), cardItem.getToughness()));
-            } else if (type.startsWith("planeswalker")) {
-                holder.featuredStatTextView.setText(cardItem.getLoyalty());
+            if (type.startsWith(getActivity().getString(R.string.TYPE_CREATURE_STARTS))) {
+                holder.featuredStatTextView.setText(String.format(
+                        getActivity().getString(R.string.FEATURED_STAT_POWER_TOUGHNESS_FORMAT),
+                        mCursor.getString(CardLoader.Query.POWER),
+                        mCursor.getString(CardLoader.Query.TOUGHNESS)));
+            } else if (type.startsWith(getActivity().getString(R.string.TYPE_PLANESWALKER_STARTS))) {
+                holder.featuredStatTextView.setText(mCursor.getString(CardLoader.Query.LOYALTY));
             } else {
-                holder.featuredStatTextView.setText("");
+                holder.featuredStatTextView.setText(R.string.NO_FEATURED_STAT);
             }
+
+            //Picasso.with(getActivity()).setIndicatorsEnabled(true);
+
+            /*Picasso.with(getActivity())
+                    .load(imageUrl)
+                    .placeholder(R.mipmap.sample_card_crop)
+                    .into(holder.croppedImageView);*/
 
             PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
                     .load(imageUrl)
                     .placeholder(R.mipmap.sample_card_crop)
-                    .into(holder.cropppedImageView);
+                    .into(holder.croppedImageView);
+
+            holder.croppedImageView.setTag(String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                holder.croppedImageView.setTransitionName(
+                        String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mCardList.size();
+            return mCursor.getCount();
         }
-    }*/
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView cropppedImageView;
-        public TextView nameTextView;
-        public TextView setRarityTextView;
-        public TextView typeTextView;
-        public LinearLayout rightContainer;
-        public LinearLayout manaCostContainerView;
-        public TextView featuredStatTextView;
+        public class SearchResultViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener {
 
-        public ViewHolder(View view) {
-            super(view);
-            cropppedImageView = (ImageView)view.findViewById(R.id.cropped_image_view);
-            nameTextView = (TextView) view.findViewById(R.id.card_name_text_view);
-            setRarityTextView = (TextView) view.findViewById(R.id.set_rarity_text_view);
-            typeTextView = (TextView) view.findViewById(R.id.type_text_view);
-            rightContainer = (LinearLayout) view.findViewById(R.id.right_container);
-            manaCostContainerView = (LinearLayout) view.findViewById(R.id.mana_cost_container_view);
-            featuredStatTextView = (TextView) view.findViewById(R.id.featured_stat_text_view);
+            public ImageView croppedImageView;
+            public TextView nameTextView;
+            public TextView setRarityTextView;
+            public TextView typeTextView;
+            public LinearLayout rightContainer;
+            public TextView manaCostTextView;
+            public TextView featuredStatTextView;
+
+            public SearchResultViewHolder(View view) {
+                super(view);
+                croppedImageView = (ImageView)view.findViewById(R.id.cropped_image_view);
+                nameTextView = (TextView) view.findViewById(R.id.card_name_text_view);
+                setRarityTextView = (TextView) view.findViewById(R.id.set_rarity_text_view);
+                typeTextView = (TextView) view.findViewById(R.id.type_text_view);
+                rightContainer = (LinearLayout) view.findViewById(R.id.right_container);
+                manaCostTextView = (TextView) view.findViewById(R.id.mana_cost_text_view);
+                featuredStatTextView = (TextView) view.findViewById(R.id.featured_stat_text_view);
+
+                view.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View view) {
+                mCardClickListener.recyclerViewItemClicked(view, this.getLayoutPosition());
+            }
+
         }
+
     }
 
 }
