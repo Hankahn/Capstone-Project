@@ -35,6 +35,7 @@ public enum PicassoBigCache {
         ctx = ctx.getApplicationContext(); // need application context - activity's context could cause harm
         Picasso.Builder builder = new Picasso.Builder(ctx);
         builder.downloader(createBigCacheDownloader(ctx));
+        //builder.indicatorsEnabled(true);
         picassoInstance = builder.build();
     }
 
