@@ -12,8 +12,17 @@ import java.util.regex.Pattern;
 public class CardUtil {
 
     public static int parseSetRarity(String setCode, String rarity) {
-        String resId = String.format("%s_%s", setCode.toLowerCase(),
-                rarity.toLowerCase().replace(" ", ""));
+        String setCodeFixed = setCode.toLowerCase();
+        String rarityFixed = rarity.toLowerCase().replace(" ", "").substring(0, 1);
+
+        if (setCode.startsWith("1") || setCode.startsWith("2") || setCode.startsWith("3") ||
+                setCode.startsWith("4") || setCode.startsWith("5") || setCode.startsWith("6") ||
+                setCode.startsWith("7") || setCode.startsWith("8") || setCode.startsWith("9") ||
+                setCode.startsWith("0")) {
+            setCodeFixed = "c" + setCodeFixed;
+        }
+
+        String resId = String.format("%s_%s", setCodeFixed, rarityFixed);
 
         return Util.getResId(resId, R.mipmap.class);
     }
