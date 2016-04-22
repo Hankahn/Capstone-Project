@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -141,19 +142,26 @@ public class CardViewDetailFragment extends Fragment
             final String imageUrl = "http://www.essentialtcg.com/images/" +
                     mCardItem.getSetCode() + "/" +
                     mCardItem.getImageName().replace(" ", "%20") +
-                    ".jpg";//?width=" +
+                    ".jpg?height=50";//?width=" +
                     //String.valueOf(Util.dpToPx(getActivity(), 600));
 
             Log.d("MtMImageUrl", imageUrl);
 
-            PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
+            cardImageView.setTransitionName("source_" + String.valueOf(mCardItem.getId()));
+
+            Log.d("MtMT", "source_" + String.valueOf(mCardItem.getId()));
+
+            /*PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
                     .load(imageUrl)
                     .centerInside()
                     .fit()
                     .into(cardImageView, new Callback() {
 
                         @Override
-                        public void onSuccess() { }
+                        public void onSuccess() {
+                            //getActivity().startPostponedEnterTransition();
+                            ActivityCompat.startPostponedEnterTransition(getActivity());
+                        }
 
                         @Override
                         public void onError() {
@@ -162,7 +170,9 @@ public class CardViewDetailFragment extends Fragment
                             Log.d(TAG, "onError() called with: " + imageUrl);
                         }
 
-                    });
+                    });*/
+
+            cardImageView.setImageResource(R.mipmap.soi_m);
 
             nameTextView.setText(mCardItem.getBothNames(getActivity()));
 

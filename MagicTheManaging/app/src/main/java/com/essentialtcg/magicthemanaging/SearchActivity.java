@@ -1,6 +1,7 @@
 package com.essentialtcg.magicthemanaging;
 
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,7 +12,8 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity
+    implements ViewPager.OnPageChangeListener{
 
     private String MENU_TITLES[] = { "Search", "Decks", "Collection", "Favorites" };
     private int MENU_ICONS[] = { R.mipmap.ic_search_black_18, R.mipmap.ic_content_copy_black_18,
@@ -25,12 +27,14 @@ public class SearchActivity extends AppCompatActivity {
     private RecyclerView.Adapter mDrawerAdapter;
     private RecyclerView.LayoutManager mDrawerLayoutManager;
 
+    private int mStartPosition;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+        //getSupportActionBar().setIcon(R.mipmap.ic_launcher);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerRecycler = (RecyclerView) findViewById(R.id.RecyclerView);
@@ -45,6 +49,27 @@ public class SearchActivity extends AppCompatActivity {
         mDrawerRecycler.setLayoutManager(mDrawerLayoutManager);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+        SearchFragment searchFragment = new SearchFragment();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, searchFragment)
+                .commit();
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        mStartPosition = position;
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        mStartPosition = position;
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 
     @Override

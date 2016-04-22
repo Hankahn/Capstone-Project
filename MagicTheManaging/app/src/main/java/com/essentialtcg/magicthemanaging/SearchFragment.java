@@ -1,6 +1,5 @@
 package com.essentialtcg.magicthemanaging;
 
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -14,12 +13,15 @@ import android.support.v4.content.Loader;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
+import android.transition.Fade;
+import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -78,6 +80,7 @@ public class SearchFragment extends Fragment
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.search_toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setIcon(R.mipmap.ic_launcher);
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.card_recycler_view);
         mEmptyResultTextView = (TextView) rootView.findViewById(R.id.empty_reset_text_view);
@@ -166,12 +169,12 @@ public class SearchFragment extends Fragment
 
         LoadData();
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        /*if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setExitSharedElementCallback(new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names,
                                                 Map<String, View> sharedElements) {
-                    /*if(mReenterState != null) {
+                    *//*if(mReenterState != null) {
                         int startPosition = mReenterState.getInt(STARTING_ARTICLE_POSITION);
                         int currentPosition = mReenterState.getInt(CURRENT_ARTICLE_POSITION);
 
@@ -194,11 +197,10 @@ public class SearchFragment extends Fragment
                         }
 
                         mReenterState = null;
-                    }*/
+                    }*//*
                 }
             });
-        }
-
+        }*/
 
         return rootView;
     }
@@ -286,11 +288,30 @@ public class SearchFragment extends Fragment
 
     @Override
     public void recyclerViewItemClicked(View view, int position) {
-        Intent viewCardIntent = new Intent(getActivity(), CardViewActivity.class);
+        //Intent viewCardIntent = new Intent(getActivity(), CardViewActivity.class);
 
         View croppedImageView = view.findViewById(R.id.cropped_image_view);
 
-        Bundle bundle = null;
+        CardViewFragment cardViewFragment = CardViewFragment.newInstance(
+                position, mSearchParameters);
+
+        cardViewFragment.setSharedElementEnterTransition(new DetailTransition());
+        cardViewFragment.setEnterTransition(new Fade());
+        setExitTransition(new Fade());
+        cardViewFragment.setSharedElementReturnTransition(new DetailTransition());
+
+        String destinationTransitionName = croppedImageView.getTransitionName();
+            Log.d("MtMT", croppedImageView.getTransitionName() + " -> " + destinationTransitionName);
+
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .addSharedElement(croppedImageView, destinationTransitionName)
+                    //.add(R.id.fragment_container, cardViewFragment)
+                    .replace(R.id.fragment_container, cardViewFragment)
+                    .addToBackStack(null)
+                    .commit();
+
+        /*Bundle bundle = null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String transitionName = croppedImageView.getTransitionName();
@@ -305,7 +326,7 @@ public class SearchFragment extends Fragment
         viewCardIntent.putExtra(CardViewActivity.INITIAL_CARD_POSITION, position);
         viewCardIntent.putExtra(CardViewActivity.SEARCH_PARAMETERS, mSearchParameters);
 
-        startActivity(viewCardIntent, bundle);
+        startActivity(viewCardIntent, bundle);*/
     }
 
     private class SearchResultsRecyclerAdapter
@@ -358,8 +379,8 @@ public class SearchFragment extends Fragment
             final String imageUrl = "http://www.essentialtcg.com/images/" +
                     mCursor.getString(CardLoader.Query.SET_CODE) + "/" +
                     mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20") +
-                    ".jpg?cropyunits=100&cropxunits=100&crop=10,12,90,50&width=" +
-                    String.valueOf(Util.dpToPx(getActivity(), 50));
+                    ".jpg";//?cropyunits=100&cropxunits=100&crop=10,12,90,50&width=" +
+                    //String.valueOf(Util.dpToPx(getActivity(), 50));
 
             if (mCursor.getString(CardLoader.Query.NAME2) != null) {
                 holder.nameTextView.setText(String.format(
@@ -489,16 +510,19 @@ public class SearchFragment extends Fragment
                     .placeholder(R.mipmap.sample_card_crop)
                     .into(holder.croppedImageView);*/
 
-            PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
+            /*PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
                     .load(imageUrl)
                     .placeholder(R.mipmap.sample_card_crop)
-                    .into(holder.croppedImageView);
+                    .into(holder.croppedImageView);*/
 
-            holder.croppedImageView.setTag(String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
+            holder.croppedImageView.setImageResource(R.mipmap.soi_m);
+
+            //holder.croppedImageView.setTag(String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 holder.croppedImageView.setTransitionName(
-                        String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
+                        "source_" + String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
+                //Log.d("MtMT", String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
             }
         }
 

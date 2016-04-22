@@ -1,0 +1,10 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="search_list_item_vertical_margin">5dp</dimen>
+    <dimen name="search_list_item_horizontal_margin">5dp</dimen>
+    <dimen name="SET_PICKER_SET_ICON_WIDTH">15dp</dimen>
+    <dimen name="SET_PICKER_SET_ICON_HEIGHT">15dp</dimen>
+</resources>

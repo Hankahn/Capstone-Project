@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Magic the Managing</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder cardText -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="NO_FEATURED_STAT" />
+    <string name="TYPE_PLANESWALKER_STARTS">planeswalker</string>
+    <string name="TYPE_CREATURE_STARTS">creature</string>
+    <string name="FEATURED_STAT_POWER_TOUGHNESS_FORMAT" formatted="false">%s/%s</string>
+    <string name="SETS_FILTER_SEPARATOR">" or "</string>
+    <string name="CARD_NAME_DOUBLE_SIDED" formatted="false">%s / %s</string>
+    <string name="MANA_COST_WITH_SECOND_COST" formatted="false">%s/%s</string>
+    <string name="SET_PICKER_DIALOG_TITLE">Sets</string>
+    <string name="SET_ICON_DEFAULT_CONTENT_DESCRIPTION">Set Icon</string>
+    <string name="SET_GROUP_EXPANSION_DEFAULT">Pre-Block</string>
+</resources>

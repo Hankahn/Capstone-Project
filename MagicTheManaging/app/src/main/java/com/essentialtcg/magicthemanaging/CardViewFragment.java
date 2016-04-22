@@ -3,11 +3,11 @@ package com.essentialtcg.magicthemanaging;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -15,15 +15,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.essentialtcg.magicthemanaging.data.CardItem;
 import com.essentialtcg.magicthemanaging.data.CardLoader;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.data.CardTransform;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Shawn on 4/9/2016.
@@ -59,6 +55,8 @@ public class CardViewFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getActivity().postponeEnterTransition();
+
         if (savedInstanceState == null) {
             if (getArguments().containsKey(CardViewActivity.INITIAL_CARD_POSITION)) {
                 mStartPosition = getArguments().getInt(CardViewActivity.INITIAL_CARD_POSITION);
@@ -72,9 +70,12 @@ public class CardViewFragment extends Fragment
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getActivity().postponeEnterTransition();
+            //getActivity().postponeEnterTransition();
+            //getActivity().supportPostponeEnterTransition();
+            //ActivityCompat.postponeEnterTransition(getActivity());
+            //getActivity().getSupportFragmentManager().pos
 
-            setEnterSharedElementCallback(new SharedElementCallback() {
+            /*setEnterSharedElementCallback(new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                     if (mCurrentArticleDetailFragment == null) {
@@ -86,7 +87,7 @@ public class CardViewFragment extends Fragment
                     if (sharedElement == null) {
                         names.clear();
                         sharedElements.clear();
-                    } else if (sharedElement != null) {// && mSelectedItemId != mStartId) {
+                    } else if (sharedElement != null && mSelectedItemId != mStartId) {
                         sharedElement.setTransitionName(String.valueOf(mSelectedItemId));
                         names.clear();
                         names.add(sharedElement.getTransitionName());
@@ -94,13 +95,15 @@ public class CardViewFragment extends Fragment
                         sharedElements.put(sharedElement.getTransitionName(), sharedElement);
                     }
                 }
-            });
+            });*/
         }
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_card_view, container, false);
+
+        //ActivityCompat.postponeEnterTransition(getActivity());
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.card_view_toolbar);
         toolbar.setNavigationIcon(R.mipmap.ic_launcher);
@@ -112,10 +115,12 @@ public class CardViewFragment extends Fragment
 
         getLoaderManager().initLoader(0, null, this);
 
-        mPagerAdapter = new CardViewPagerAdapter(getChildFragmentManager());
+        mPagerAdapter = new CardViewPagerAdapter(getActivity().getSupportFragmentManager());
+        //mPagerAdapter = new CardViewPagerAdapter(getChildFragmentManager());
         mPager = (ViewPager) rootView.findViewById(R.id.card_view_pager);
         mPager.setAdapter(mPagerAdapter);
-        mPager.addOnPageChangeListener((CardViewActivity)getActivity());
+        mPager.addOnPageChangeListener((SearchActivity) getActivity());
+        //mPager.addOnPageChangeListener((CardViewActivity)getActivity());
         mPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             @Override
@@ -156,6 +161,11 @@ public class CardViewFragment extends Fragment
         if (mStartPosition > 0) {
             mPager.setCurrentItem(mStartPosition, false);
         }
+
+        getActivity().startPostponedEnterTransition();
+        //getActivity().supportPostponeEnterTransition();
+        //getActivity().getSupportFragmentManager().executePendingTransactions();
+        //ActivityCompat.startPostponedEnterTransition(getActivity());
     }
 
     @Override

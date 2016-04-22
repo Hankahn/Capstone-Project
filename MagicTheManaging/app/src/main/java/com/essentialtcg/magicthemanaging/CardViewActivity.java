@@ -2,11 +2,17 @@ package com.essentialtcg.magicthemanaging;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
 
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Shawn on 4/9/2016.
@@ -72,4 +78,5 @@ public class CardViewActivity extends AppCompatActivity
     public void onPageScrollStateChanged(int state) {
 
     }
+
 }
