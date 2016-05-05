@@ -1,5 +1,7 @@
-package com.essentialtcg.magicthemanaging;
+package com.essentialtcg.magicthemanaging.adapters;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,10 +9,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.essentialtcg.magicthemanaging.R;
+import com.essentialtcg.magicthemanaging.ui.activities.FavoritesActivity;
+
 /**
  * Created by Shawn on 4/18/2016.
  */
-public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder> {
+public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerViewHolder> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
@@ -23,7 +28,8 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     private String mEmail;
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class DrawerViewHolder extends RecyclerView.ViewHolder
+        implements View.OnClickListener {
 
         int HolderId;
 
@@ -33,7 +39,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
         TextView mName;
         TextView mEmail;
 
-        public ViewHolder(View itemView, int viewType) {
+        public DrawerViewHolder(View itemView, int viewType) {
             super(itemView);
 
             if (viewType == TYPE_ITEM) {
@@ -46,11 +52,24 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
                 mProfile = (ImageView) itemView.findViewById(R.id.circleView);
                 HolderId = 0;
             }
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (getItemViewType() == TYPE_ITEM && mTextView.getText().equals("Favorites")) {
+                Context context = view.getContext();
+
+                Intent favoritesIntent = new Intent(context, FavoritesActivity.class);
+
+                context.startActivity(favoritesIntent, null);
+            }
         }
 
     }
 
-    DrawerAdapter (String titles[], int icons[], String name, String email, int profile) {
+    public DrawerAdapter(String titles[], int icons[], String name, String email, int profile) {
         mNavTitles = titles;
         mIcons = icons;
         mName = name;
@@ -59,30 +78,29 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public DrawerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         if (viewType == TYPE_ITEM) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_drawer, parent, false);
 
-            ViewHolder viewHolderItem = new ViewHolder(view, viewType);
+            DrawerViewHolder viewHolderItem = new DrawerViewHolder(view, viewType);
 
             return viewHolderItem;
         } else if (viewType == TYPE_HEADER) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.header, parent, false);
 
-            ViewHolder viewHolderHeader = new ViewHolder(view, viewType);
+            DrawerViewHolder viewHolderHeader = new DrawerViewHolder(view, viewType);
 
             return viewHolderHeader;
         }
 
         return null;
-
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(DrawerViewHolder holder, int position) {
         if (holder.HolderId == 1) {
             holder.mTextView.setText(mNavTitles[position - 1]);
             holder.mImageView.setImageResource(mIcons[position - 1]);
