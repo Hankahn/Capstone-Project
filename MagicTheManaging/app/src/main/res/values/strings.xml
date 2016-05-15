@@ -14,4 +14,6 @@
     <string name="SET_PICKER_DIALOG_TITLE">Sets</string>
     <string name="SET_ICON_DEFAULT_CONTENT_DESCRIPTION">Set Icon</string>
     <string name="SET_GROUP_EXPANSION_DEFAULT">Pre-Block</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Closed</string>
 </resources>

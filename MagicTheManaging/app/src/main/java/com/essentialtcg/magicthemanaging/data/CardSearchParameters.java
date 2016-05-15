@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 
+import com.essentialtcg.magicthemanaging.data.items.SetItem;
 import com.essentialtcg.magicthemanaging.utils.SetArrayList;
 
 /**

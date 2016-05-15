@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,8 @@ import java.util.HashMap;
  * Created by Shawn on 2/24/2016.
  */
 public class SelectionBuilder {
+
+    private static final String TAG = "SelectionBuilder";
 
     private String mTable = null;
     private HashMap<String, String> mProjectionMap;
@@ -160,12 +163,21 @@ public class SelectionBuilder {
     /**
      * Execute query using the current internal state as {@code WHERE} clause.
      */
+    public Cursor query(SQLiteDatabase db, String[] columns, String orderBy, String limit) {
+        return query(db, columns, null, null, orderBy, limit);
+    }
+
+    /**
+     * Execute query using the current internal state as {@code WHERE} clause.
+     */
     public Cursor query(SQLiteDatabase db, String[] columns, String groupBy,
                         String having, String orderBy, String limit) {
         assertTable();
         if (columns != null) {
             mapColumns(columns);
         }
+
+        Log.d(TAG, "query: " + mTable);
         return db.query(mTable, columns, getSelection(), getSelectionArgs(), groupBy, having,
                 orderBy, limit);
     }

@@ -2,6 +2,7 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view_detail_coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -124,6 +125,14 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/card_detail_price_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#DDDDDD"
+                android:padding="3dp"
+                tools:text="H: $10.00 L: $7.00 A: $8.00 F: $15.00" />
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/card_details_tab_layout"

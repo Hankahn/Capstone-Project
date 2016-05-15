@@ -10,7 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.essentialtcg.magicthemanaging.R;
+import com.essentialtcg.magicthemanaging.callback.DrawerAdapterCallback;
 import com.essentialtcg.magicthemanaging.ui.activities.FavoritesActivity;
+import com.essentialtcg.magicthemanaging.ui.fragments.FavoritesFragment;
+import com.essentialtcg.magicthemanaging.ui.fragments.SearchFragment;
 
 /**
  * Created by Shawn on 4/18/2016.
@@ -27,9 +30,9 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
     private int mProfile;
     private String mEmail;
 
+    private DrawerAdapterCallback mDrawerAdapterCallback;
 
-    public static class DrawerViewHolder extends RecyclerView.ViewHolder
-        implements View.OnClickListener {
+    public static class DrawerViewHolder extends RecyclerView.ViewHolder {
 
         int HolderId;
 
@@ -52,29 +55,18 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
                 mProfile = (ImageView) itemView.findViewById(R.id.circleView);
                 HolderId = 0;
             }
-
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            if (getItemViewType() == TYPE_ITEM && mTextView.getText().equals("Favorites")) {
-                Context context = view.getContext();
-
-                Intent favoritesIntent = new Intent(context, FavoritesActivity.class);
-
-                context.startActivity(favoritesIntent, null);
-            }
         }
 
     }
 
-    public DrawerAdapter(String titles[], int icons[], String name, String email, int profile) {
+    public DrawerAdapter(String titles[], int icons[], String name, String email, int profile,
+                         DrawerAdapterCallback drawerAdapterCallback) {
         mNavTitles = titles;
         mIcons = icons;
         mName = name;
         mEmail = email;
         mProfile = profile;
+        mDrawerAdapterCallback = drawerAdapterCallback;
     }
 
     @Override
@@ -100,10 +92,16 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
     }
 
     @Override
-    public void onBindViewHolder(DrawerViewHolder holder, int position) {
+    public void onBindViewHolder(DrawerViewHolder holder, final int position) {
         if (holder.HolderId == 1) {
             holder.mTextView.setText(mNavTitles[position - 1]);
             holder.mImageView.setImageResource(mIcons[position - 1]);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDrawerAdapterCallback.onCallback(position - 1);
+                }
+            });
         } else {
             holder.mProfile.setImageResource(mProfile);
             holder.mName.setText(mName);

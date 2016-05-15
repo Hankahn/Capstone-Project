@@ -33,11 +33,11 @@
 
                 <ImageView
                     android:id="@+id/cropped_image_view"
-                    android:layout_width="60dp"
+                    android:layout_width="30dp"
                     android:layout_height="43dp"
                     android:layout_marginRight="5dp"
                     android:layout_marginEnd="5dp"
-                    android:src="@mipmap/sample_card_crop" />
+                    android:src="@mipmap/card_back" />
 
                 <LinearLayout
                     android:layout_width="0dp"

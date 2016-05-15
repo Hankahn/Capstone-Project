@@ -1,7 +1,6 @@
 package com.essentialtcg.magicthemanaging.utils;
 
-import com.essentialtcg.magicthemanaging.R;
-import com.essentialtcg.magicthemanaging.data.SetItem;
+import com.essentialtcg.magicthemanaging.data.items.SetItem;
 
 import java.util.ArrayList;
 
