@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -63,6 +64,7 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
     //private long mItemId;
     private long mSelectedItemId;
     private View mRootView;
+    private GetPriceAsyncTask mGetPriceTask;
 
     public static CardViewDetailFragment newInstance(CardItem cardItem, long selectedItemId) {
         CardViewDetailFragment fragment = new CardViewDetailFragment();
@@ -92,7 +94,7 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
             mSelectedItemId = getArguments().getLong(ARG_SELECTED_ITEM_ID);
         }
 
-        GetPriceAsyncTask getPriceAsyncTask = new GetPriceAsyncTask(this);
+        mGetPriceTask = new GetPriceAsyncTask(this);
 
         String url = null;
         try {
@@ -103,7 +105,8 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        getPriceAsyncTask.execute(url);
+
+        mGetPriceTask.execute(url);
     }
 
     public CardViewActivity getActivityCast() {
@@ -111,8 +114,31 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (isGetPriceTaskRunning()) {
+            mGetPriceTask.cancel(true);
+        }
+    }
+
+    private boolean isGetPriceTaskRunning () {
+        return (mGetPriceTask != null) && (mGetPriceTask.getStatus() == AsyncTask.Status.RUNNING);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(ARG_CARD_TO_SHOW)) {
+                mCardItem = savedInstanceState.getParcelable(ARG_CARD_TO_SHOW);
+            }
+
+            if (savedInstanceState.containsKey(ARG_SELECTED_ITEM_ID)) {
+                mSelectedItemId = savedInstanceState.getLong(ARG_SELECTED_ITEM_ID);
+            }
+        }
 
         bindViews();
     }
@@ -310,16 +336,26 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(ARG_CARD_TO_SHOW, mCardItem);
+        outState.putLong(ARG_SELECTED_ITEM_ID, mSelectedItemId);
+    }
+
+    @Override
     public void onPriceRetrievedCallback(String priceXml) {
         PriceItem priceItem = CardUtil.parsePrice(priceXml);
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-        
-        mCardPriceTextView.setText(String.format("H: %s L: %s A: %s F: %s",
-                currencyFormat.format(priceItem.getHighPrice()),
-                currencyFormat.format(priceItem.getLowPrice()),
-                currencyFormat.format(priceItem.getAveragePrice()),
-                currencyFormat.format(priceItem.getFoilPrice())
-        ));
+
+        if (mCardPriceTextView != null) {
+            mCardPriceTextView.setText(String.format("H: %s L: %s A: %s F: %s",
+                    currencyFormat.format(priceItem.getHighPrice()),
+                    currencyFormat.format(priceItem.getLowPrice()),
+                    currencyFormat.format(priceItem.getAveragePrice()),
+                    currencyFormat.format(priceItem.getFoilPrice())
+            ));
+        }
         //Toast.makeText(getActivity(), "hello", Toast.LENGTH_SHORT).show();
     }
 

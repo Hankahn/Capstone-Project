@@ -32,7 +32,7 @@ public class CardViewActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_view);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postponeEnterTransition();
 
             Window window = getWindow();
@@ -50,9 +50,14 @@ public class CardViewActivity extends AppCompatActivity
                 mStartPosition = getIntent().getExtras().getInt(INITIAL_CARD_POSITION, 0);
                 mCurrentPosition = mStartPosition;
             }
-        } else if (savedInstanceState.containsKey(INITIAL_CARD_POSITION)) {
-            mStartPosition = savedInstanceState.getInt(INITIAL_CARD_POSITION);
-            mCurrentPosition = savedInstanceState.getInt(CURRENT_CARD_POSITION);
+        } else {
+            if (savedInstanceState.containsKey(INITIAL_CARD_POSITION)) {
+                mStartPosition = savedInstanceState.getInt(INITIAL_CARD_POSITION);
+            }
+
+            if (savedInstanceState.containsKey(CURRENT_CARD_POSITION)) {
+                mCurrentPosition = savedInstanceState.getInt(CURRENT_CARD_POSITION);
+            }
         }
 
         if (savedInstanceState == null) {
@@ -67,8 +72,6 @@ public class CardViewActivity extends AppCompatActivity
         } else {
             CardViewFragment cardViewFragment = (CardViewFragment) getSupportFragmentManager()
                     .findFragmentByTag("CardViewFragment");
-
-            //finishAfterTransition();
         }
     }
 
@@ -118,4 +121,5 @@ public class CardViewActivity extends AppCompatActivity
 
         super.onBackPressed();
     }*/
+
 }

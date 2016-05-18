@@ -19,12 +19,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.essentialtcg.magicthemanaging.applications.AnalyticsApplication;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.data.items.CardItem;
 import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
 import com.essentialtcg.magicthemanaging.data.transforms.CardTransform;
 import com.essentialtcg.magicthemanaging.ui.activities.CardViewActivity;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.List;
 import java.util.Map;
@@ -38,16 +41,17 @@ public class CardViewFragment extends Fragment
     private static final String TAG = "CardViewFragment";
 
     private ViewPager mPager;
+    private CardViewPagerAdapter mPagerAdapter;
 
     private CardViewDetailFragment mCardViewDetailFragment;
 
     private CardSearchParameters mSearchParameters;
     private Cursor mCursor;
-    private CardViewPagerAdapter mPagerAdapter;
     private int mStartPosition;
     private int mCurrentPosition;
-    private long mStartItemId;
+    //private long mStartItemId;
     private long mSelectedItemId;
+    private Tracker mTracker;
 
     private final SharedElementCallback mSharedElementCallback = new SharedElementCallback() {
         @Override
@@ -92,7 +96,9 @@ public class CardViewFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //getActivity().postponeEnterTransition();
+        AnalyticsApplication application = (AnalyticsApplication) getActivity().getApplication();
+
+        mTracker = application.getDefaultTracker();
 
         getActivity().setEnterSharedElementCallback(mSharedElementCallback);
 
@@ -112,12 +118,20 @@ public class CardViewFragment extends Fragment
             mCurrentPosition = savedInstanceState.getInt(CardViewActivity.CURRENT_CARD_POSITION);
         }
 
-        if (getArguments().containsKey(CardViewActivity.SELECTED_ITEM_ID)) {
-            mSelectedItemId = getArguments().getLong(CardViewActivity.SELECTED_ITEM_ID);
+        if (savedInstanceState == null) {
+            if (getArguments().containsKey(CardViewActivity.SELECTED_ITEM_ID)) {
+                mSelectedItemId = getArguments().getLong(CardViewActivity.SELECTED_ITEM_ID);
+            } else {
+                mSelectedItemId = savedInstanceState.getLong(CardViewActivity.SELECTED_ITEM_ID);
+            }
         }
 
-        if (getArguments().containsKey(CardViewActivity.SEARCH_PARAMETERS)) {
-            mSearchParameters = getArguments().getParcelable(CardViewActivity.SEARCH_PARAMETERS);
+        if (savedInstanceState == null) {
+            if (getArguments().containsKey(CardViewActivity.SEARCH_PARAMETERS)) {
+                mSearchParameters = getArguments().getParcelable(CardViewActivity.SEARCH_PARAMETERS);
+            } else {
+                mSearchParameters = savedInstanceState.getParcelable(CardViewActivity.SEARCH_PARAMETERS);
+            }
         }
     }
 
@@ -128,15 +142,51 @@ public class CardViewFragment extends Fragment
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.card_view_toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
+        if (savedInstanceState == null) {
+            if (getArguments().containsKey(CardViewActivity.INITIAL_CARD_POSITION)) {
+                mStartPosition = getArguments().getInt(CardViewActivity.INITIAL_CARD_POSITION);
+            }
+        } else {
+            mStartPosition = savedInstanceState.getInt(CardViewActivity.INITIAL_CARD_POSITION);
+        }
+
+        if (savedInstanceState == null) {
+            if (getArguments().containsKey(CardViewActivity.CURRENT_CARD_POSITION)) {
+                mCurrentPosition = getArguments().getInt(CardViewActivity.CURRENT_CARD_POSITION);
+            }
+        } else {
+            mCurrentPosition = savedInstanceState.getInt(CardViewActivity.CURRENT_CARD_POSITION);
+        }
+
+        if (savedInstanceState == null) {
+            if (getArguments().containsKey(CardViewActivity.SELECTED_ITEM_ID)) {
+                mSelectedItemId = getArguments().getLong(CardViewActivity.SELECTED_ITEM_ID);
+            } else {
+                mSelectedItemId = savedInstanceState.getLong(CardViewActivity.SELECTED_ITEM_ID);
+            }
+        }
+
+        if (savedInstanceState == null) {
+            if (getArguments().containsKey(CardViewActivity.SEARCH_PARAMETERS)) {
+                mSearchParameters = getArguments().getParcelable(CardViewActivity.SEARCH_PARAMETERS);
+            } else {
+                mSearchParameters = savedInstanceState.getParcelable(CardViewActivity.SEARCH_PARAMETERS);
+            }
+        }
+
         if (mSearchParameters == null) {
             mSearchParameters = new CardSearchParameters();
         }
 
-        getLoaderManager().initLoader(0, null, this);
+        if (getLoaderManager().getLoader(0) == null) {
+            getLoaderManager().initLoader(0, null, this);
+        } else {
+            getLoaderManager().restartLoader(0, null, this);
+        }
 
-        mPagerAdapter = new CardViewPagerAdapter(getActivity().getSupportFragmentManager());
-        //mPagerAdapter = new CardViewPagerAdapter(getChildFragmentManager());
+        //mPagerAdapter = new CardViewPagerAdapter(getActivity().getSupportFragmentManager());
         mPager = (ViewPager) rootView.findViewById(R.id.card_view_pager);
+        mPagerAdapter = new CardViewPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
         //mPager.addOnPageChangeListener((SearchActivity) getActivity());
         mPager.addOnPageChangeListener((CardViewActivity)getActivity());
@@ -150,6 +200,8 @@ public class CardViewFragment extends Fragment
                 mCurrentPosition = position;
                 mCardViewDetailFragment =
                         (CardViewDetailFragment) mPagerAdapter.getItem(position);
+
+                sendViewedCardName();
             }
         });
 
@@ -162,11 +214,21 @@ public class CardViewFragment extends Fragment
 
         outState.putInt(CardViewActivity.INITIAL_CARD_POSITION, mStartPosition);
         outState.putInt(CardViewActivity.CURRENT_CARD_POSITION, mCurrentPosition);
+        outState.putLong(CardViewActivity.SELECTED_ITEM_ID, mSelectedItemId);
+        outState.putParcelable(CardViewActivity.SEARCH_PARAMETERS, mSearchParameters);
     }
 
     public Fragment getCurrentPagerFragment(int position) {
         FragmentStatePagerAdapter a = (FragmentStatePagerAdapter) mPager.getAdapter();
         return (Fragment) a.instantiateItem(mPager, position);
+    }
+
+    private void sendViewedCardName() {
+        String name = mCursor.getString(CardLoader.Query.NAME);
+
+
+        mTracker.setScreenName("Card~" + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

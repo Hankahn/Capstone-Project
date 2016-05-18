@@ -32,7 +32,8 @@ import com.essentialtcg.magicthemanaging.adapters.DrawerAdapter;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements DrawerAdapterCallback {
+public class MainActivity extends AppCompatActivity
+        implements DrawerAdapterCallback {
     //implements ViewPager.OnPageChangeListener {
 
     private String TAG = "MainActivity";
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapterCall
         super.onActivityReenter(resultCode, data);
 
         postponeEnterTransition();
+        //Toast.makeText(this, "postponed transitions", Toast.LENGTH_SHORT).show();
 
         mReenterState = new Bundle(data.getExtras());
 
@@ -171,4 +173,3 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapterCall
     }
 
 }
-

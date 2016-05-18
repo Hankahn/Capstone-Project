@@ -45,6 +45,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.essentialtcg.magicthemanaging.applications.AnalyticsApplication;
 import com.essentialtcg.magicthemanaging.behaviors.ScrollFabBehavior;
 import com.essentialtcg.magicthemanaging.callback.UpdateRecyclerViewCallback;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
@@ -56,6 +57,8 @@ import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
 import com.essentialtcg.magicthemanaging.ui.activities.CardViewActivity;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
 import com.essentialtcg.magicthemanaging.utils.SetArrayList;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -77,7 +80,10 @@ public class SearchFragment extends Fragment
     private final int SET_PICKER_RESULTS = 0;
     private static final Interpolator INTERPOLATOR = new FastOutSlowInInterpolator();
 
+    private static final int LOADER_ID = 1;
+
     private RecyclerView mRecyclerView;
+    private SearchResultsRecyclerAdapter mAdapter;
     private TextView mEmptyResultTextView;
     private View mBottomSheet;
     private EditText mNameFilterEditText;
@@ -121,10 +127,10 @@ public class SearchFragment extends Fragment
 
                     View updatedSharedElement = viewHolder.croppedImageView;
 
-                /*ImageView croppedImageView = (ImageView) mRecyclerView.findViewWithTag(
+                    /*ImageView croppedImageView = (ImageView) mRecyclerView.findViewWithTag(
                         updatedTransitionName);
 
-                View updatedSharedElement = croppedImageView;*/
+                    View updatedSharedElement = croppedImageView;*/
 
                     if (updatedSharedElement != null) {
                         names.clear();
@@ -234,6 +240,7 @@ public class SearchFragment extends Fragment
             }
         });
 
+        //getActivity().setEnterSharedElementCallback(mSharedElementCallback);
         getActivity().setExitSharedElementCallback(mSharedElementCallback);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -246,7 +253,7 @@ public class SearchFragment extends Fragment
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+        //super.onSaveInstanceState(outState);
 
         int position;
 
@@ -260,6 +267,8 @@ public class SearchFragment extends Fragment
 
         outState.putInt(SEARCH_RESULTS_POSITION_TAG, position);
         outState.putParcelable(SEARCH_PARAMETERS_TAG, mSearchParameters);
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -284,14 +293,16 @@ public class SearchFragment extends Fragment
             mRecyclerView.setVisibility(View.VISIBLE);
         }
 
-        SearchResultsRecyclerAdapter adapter = new SearchResultsRecyclerAdapter(cursor);
+        mAdapter = new SearchResultsRecyclerAdapter(cursor);
+        //SearchResultsRecyclerAdapter adapter = new SearchResultsRecyclerAdapter(cursor);
 
-        adapter.setHasStableIds(true);
+        mAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         layoutManager.scrollToPosition(mPosition);
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.swapAdapter(mAdapter, true);
+        //mRecyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -300,7 +311,11 @@ public class SearchFragment extends Fragment
     }
 
     private void LoadData() {
-        getLoaderManager().restartLoader(0, null, this);
+        if (getLoaderManager().getLoader(LOADER_ID) == null) {
+            getLoaderManager().initLoader(LOADER_ID, null, this);
+        } else {
+            getLoaderManager().restartLoader(0, null, this);
+        }
     }
 
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback =
@@ -336,19 +351,34 @@ public class SearchFragment extends Fragment
 
         mReturning = true;
 
+        mRecyclerView.invalidate();
+        /*if (mRecyclerView.()) {
+            getActivity().startPostponedEnterTransition();
+
+            return;
+        }*/
+
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                 mRecyclerView.requestLayout();
-                startPostponedEnterTransition();
+                Toast.makeText(getActivity(), "starting postponed transitions", Toast.LENGTH_SHORT).show();
+                getActivity().startPostponedEnterTransition();
+                //startPostponedEnterTransition();
                 return true;
             }
         });
     }
 
     private void startPostponedEnterTransition() {
+        if (mRecyclerView.isAttachedToWindow()) {
+            getActivity().startPostponedEnterTransition();
+
+            return;
+        }
+
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -357,6 +387,7 @@ public class SearchFragment extends Fragment
                 mRecyclerView.requestLayout();
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    Toast.makeText(getActivity(), "starting postponed transitions", Toast.LENGTH_SHORT).show();
                     getActivity().startPostponedEnterTransition();
                 }
 
