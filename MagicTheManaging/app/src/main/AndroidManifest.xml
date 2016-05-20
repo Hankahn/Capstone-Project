@@ -44,6 +44,11 @@
             android:exported="false" />
 
         <provider
+            android:name=".data.contentProviders.FavoriteProvider"
+            android:authorities="com.essentialtcg.magicthemanaging.favorites"
+            android:exported="false" />
+
+        <provider
             android:name=".data.contentProviders.SetProvider"
             android:authorities="com.essentialtcg.magicthemanaging.sets"
             android:exported="false" />
