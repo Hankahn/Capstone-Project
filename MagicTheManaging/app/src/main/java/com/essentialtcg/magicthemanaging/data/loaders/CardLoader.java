@@ -38,6 +38,7 @@ public class CardLoader extends CursorLoader {
     }
 
     public interface Query {
+
         String[] PROJECTION = {
                 CardContract.Cards._ID,
                 CardContract.Cards.NAME,

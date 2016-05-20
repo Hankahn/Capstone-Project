@@ -121,17 +121,17 @@ public class CardViewFragment extends Fragment
         if (savedInstanceState == null) {
             if (getArguments().containsKey(CardViewActivity.SELECTED_ITEM_ID)) {
                 mSelectedItemId = getArguments().getLong(CardViewActivity.SELECTED_ITEM_ID);
-            } else {
+            }/* else {
                 mSelectedItemId = savedInstanceState.getLong(CardViewActivity.SELECTED_ITEM_ID);
-            }
+            }*/
         }
 
         if (savedInstanceState == null) {
             if (getArguments().containsKey(CardViewActivity.SEARCH_PARAMETERS)) {
                 mSearchParameters = getArguments().getParcelable(CardViewActivity.SEARCH_PARAMETERS);
-            } else {
-                mSearchParameters = savedInstanceState.getParcelable(CardViewActivity.SEARCH_PARAMETERS);
             }
+        } else {
+            mSearchParameters = savedInstanceState.getParcelable(CardViewActivity.SEARCH_PARAMETERS);
         }
     }
 
@@ -142,47 +142,15 @@ public class CardViewFragment extends Fragment
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.card_view_toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
-        if (savedInstanceState == null) {
-            if (getArguments().containsKey(CardViewActivity.INITIAL_CARD_POSITION)) {
-                mStartPosition = getArguments().getInt(CardViewActivity.INITIAL_CARD_POSITION);
-            }
-        } else {
-            mStartPosition = savedInstanceState.getInt(CardViewActivity.INITIAL_CARD_POSITION);
-        }
-
-        if (savedInstanceState == null) {
-            if (getArguments().containsKey(CardViewActivity.CURRENT_CARD_POSITION)) {
-                mCurrentPosition = getArguments().getInt(CardViewActivity.CURRENT_CARD_POSITION);
-            }
-        } else {
-            mCurrentPosition = savedInstanceState.getInt(CardViewActivity.CURRENT_CARD_POSITION);
-        }
-
-        if (savedInstanceState == null) {
-            if (getArguments().containsKey(CardViewActivity.SELECTED_ITEM_ID)) {
-                mSelectedItemId = getArguments().getLong(CardViewActivity.SELECTED_ITEM_ID);
-            } else {
-                mSelectedItemId = savedInstanceState.getLong(CardViewActivity.SELECTED_ITEM_ID);
-            }
-        }
-
-        if (savedInstanceState == null) {
-            if (getArguments().containsKey(CardViewActivity.SEARCH_PARAMETERS)) {
-                mSearchParameters = getArguments().getParcelable(CardViewActivity.SEARCH_PARAMETERS);
-            } else {
-                mSearchParameters = savedInstanceState.getParcelable(CardViewActivity.SEARCH_PARAMETERS);
-            }
-        }
-
         if (mSearchParameters == null) {
             mSearchParameters = new CardSearchParameters();
         }
 
-        if (getLoaderManager().getLoader(0) == null) {
+        /*if (getLoaderManager().getLoader(0) == null) {
             getLoaderManager().initLoader(0, null, this);
-        } else {
+        } else {*/
             getLoaderManager().restartLoader(0, null, this);
-        }
+        //}
 
         //mPagerAdapter = new CardViewPagerAdapter(getActivity().getSupportFragmentManager());
         mPager = (ViewPager) rootView.findViewById(R.id.card_view_pager);
@@ -210,12 +178,12 @@ public class CardViewFragment extends Fragment
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
         outState.putInt(CardViewActivity.INITIAL_CARD_POSITION, mStartPosition);
         outState.putInt(CardViewActivity.CURRENT_CARD_POSITION, mCurrentPosition);
         outState.putLong(CardViewActivity.SELECTED_ITEM_ID, mSelectedItemId);
         outState.putParcelable(CardViewActivity.SEARCH_PARAMETERS, mSearchParameters);
+
+        super.onSaveInstanceState(outState);
     }
 
     public Fragment getCurrentPagerFragment(int position) {

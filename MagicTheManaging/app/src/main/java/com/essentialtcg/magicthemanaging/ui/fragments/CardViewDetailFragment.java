@@ -1,12 +1,16 @@
 package com.essentialtcg.magicthemanaging.ui.fragments;
 
-import android.content.Intent;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,7 +28,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -33,13 +36,12 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.callback.GetPriceCallback;
+import com.essentialtcg.magicthemanaging.data.contracts.FavoriteContract;
 import com.essentialtcg.magicthemanaging.data.items.PriceItem;
+import com.essentialtcg.magicthemanaging.data.loaders.FavoriteLoader;
 import com.essentialtcg.magicthemanaging.tasks.GetPriceAsyncTask;
 import com.essentialtcg.magicthemanaging.utils.Util;
 import com.essentialtcg.magicthemanaging.data.items.CardItem;
-import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
-import com.essentialtcg.magicthemanaging.data.transforms.CardTransform;
-import com.essentialtcg.magicthemanaging.ui.activities.CardViewActivity;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -50,21 +52,122 @@ import java.util.ArrayList;
 /**
  * Created by Shawn on 4/9/2016.
  */
-public class CardViewDetailFragment extends Fragment implements GetPriceCallback {
+public class CardViewDetailFragment extends Fragment
+        implements GetPriceCallback {//, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = "CardViewDetailFragment";
 
     public static final String ARG_CARD_TO_SHOW = "CARD_TO_SHOW";
-    public static final String ARG_ITEM_ID = "ITEM_ID";
+    //public static final String ARG_ITEM_ID = "ITEM_ID";
     public static final String ARG_SELECTED_ITEM_ID = "START_ID";
 
-    private TextView mCardPriceTextView;
+    private static final int LOADER_ID = 0;
 
-    private CardItem mCardItem;
-    //private long mItemId;
-    private long mSelectedItemId;
+    private CoordinatorLayout mCoordinatorLayout;
     private View mRootView;
+    private TextView mCardPriceTextView;
+    private ViewPager mDetailPager;
+    private ImageView mCardImageView;
+    private LinearLayout mCardTextVersion;
+    private FloatingActionButton mFavoriteButton;
+
+    private long mSelectedItemId;
+    private CardItem mCardItem;
     private GetPriceAsyncTask mGetPriceTask;
+
+    private final TabLayout.OnTabSelectedListener mTabSelectedListener =
+            new TabLayout.OnTabSelectedListener() {
+
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    mDetailPager.setCurrentItem(tab.getPosition());
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                }
+
+            };
+
+    View.OnClickListener mFavoriteClickListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            ContentValues values = new ContentValues();
+
+            values.put(FavoriteContract.Favorites.CARD_ID, mCardItem.getId());
+
+            Uri isCardFavorite = FavoriteContract.Favorites.buildFavoriteCardUri(mCardItem.getId());
+
+            Cursor cursor = getActivity().getContentResolver().query(isCardFavorite, null, null, null, null);
+
+            if (cursor != null) {
+
+                if (cursor.getCount() == 0) {
+                    getActivity().getContentResolver().insert(FavoriteContract.Favorites.buildDirUri(),
+                            values);
+
+                    Snackbar.make(mCoordinatorLayout, "Added to favorites", Snackbar.LENGTH_SHORT).show();
+                } else {
+                    cursor.moveToFirst();
+
+                    long favoriteId = cursor.getLong(FavoriteLoader.Query._ID);
+
+                    getActivity().getContentResolver().delete(FavoriteContract.Favorites.buildDirUri(),
+                            FavoriteContract.Favorites._ID + " = ?",
+                            new String[] { String.valueOf(favoriteId) });
+
+                    Snackbar.make(mCoordinatorLayout, "Removed from favorites", Snackbar.LENGTH_SHORT).show();
+                }
+            } else {
+                Log.d(TAG, String.format("onClick: Unable to determine if card already a favorite: ",
+                        mCardItem.getId()));
+            }
+
+            //getLoaderManager().initLoader(LOADER_ID, null, CardViewDetailFragment.this);
+        }
+
+    };
+
+    RequestListener<String, GlideDrawable> mCardImageRequestListener = new RequestListener<String, GlideDrawable>() {
+        @Override
+        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+            startPostponedEnterTransition();
+            mCardImageView.setVisibility(View.GONE);
+            mCardTextVersion.setVisibility(View.VISIBLE);
+
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+            startPostponedEnterTransition();
+
+            return false;
+        }
+
+    };
+
+    ViewTreeObserver.OnPreDrawListener mCardImagePreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+
+        @Override
+        public boolean onPreDraw() {
+            mCardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getActivity().startPostponedEnterTransition();
+                Log.d("MtMU", "Starting postponed enter transitions");
+            }
+
+            return true;
+        }
+
+    };
 
     public static CardViewDetailFragment newInstance(CardItem cardItem, long selectedItemId) {
         CardViewDetailFragment fragment = new CardViewDetailFragment();
@@ -109,9 +212,9 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
         mGetPriceTask.execute(url);
     }
 
-    public CardViewActivity getActivityCast() {
+    /*public CardViewActivity getActivityCast() {
         return (CardViewActivity) getActivity();
-    }
+    }*/
 
     @Override
     public void onDestroy() {
@@ -160,9 +263,11 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
             return;
         }
 
-        final ImageView cardImageView =
+        mCoordinatorLayout =
+                (CoordinatorLayout) mRootView.findViewById(R.id.card_view_detail_coordinator_layout);
+        mCardImageView =
                 (ImageView) mRootView.findViewById(R.id.card_detail_image_view);
-        final LinearLayout cardTextVersion =
+        mCardTextVersion =
                 (LinearLayout) mRootView.findViewById(R.id.card_detail_text_version);
         TextView nameTextView = (TextView) mRootView.findViewById(R.id.card_detail_name_text_view);
         mCardPriceTextView = (TextView) mRootView.findViewById(R.id.card_detail_price_text_view);
@@ -173,9 +278,11 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
                 (TextView) mRootView.findViewById(R.id.card_detail_secondary_text_view);
         View cardTextSeparator = mRootView.findViewById(R.id.card_detail_text_separator);
         TabLayout tabLayout = (TabLayout) mRootView.findViewById(R.id.card_details_tab_layout);
-        final ViewPager detailPager = (ViewPager) mRootView.findViewById(R.id.card_detail_view_pager);
+        mDetailPager = (ViewPager) mRootView.findViewById(R.id.card_detail_view_pager);
         CardDetailPagerAdapter detailPagerAdapter =
                 new CardDetailPagerAdapter(getChildFragmentManager());
+        mFavoriteButton =
+                (FloatingActionButton) mRootView.findViewById(R.id.card_view_detail_favorite_fab);
 
         if (mCardItem != null) {
             Point size = new Point();
@@ -191,36 +298,19 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
                     ".jpg";//&height=" +
                     //String.valueOf(Util.dpToPx(getActivity(), 100));
 
-            Log.d("MtMImageUrl", imageUrl);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mCardImageView.setTransitionName("source_" + String.valueOf(mCardItem.getId()));
+            }
 
-            cardImageView.setTransitionName("source_" + String.valueOf(mCardItem.getId()));
+            mFavoriteButton.setOnClickListener(mFavoriteClickListener);
 
-            Log.d("MtMT", "source_" + String.valueOf(mCardItem.getId()));
-
-            // TODO: Try skipMemoryCache
             Glide.with(getActivity())
                     .load(imageUrl)
                     .fitCenter()
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .skipMemoryCache(true)
-                    .listener(new RequestListener<String, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                            startPostponedEnterTransition();
-                            cardImageView.setVisibility(View.GONE);
-                            cardTextVersion.setVisibility(View.VISIBLE);
-
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            startPostponedEnterTransition();
-
-                            return false;
-                        }
-                    })
-                    .into(cardImageView);
+                    .listener(mCardImageRequestListener)
+                    .into(mCardImageView);
 
             nameTextView.setText(mCardItem.getBothNames(getActivity()));
 
@@ -248,20 +338,26 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
                     ImageView manaCostImage = new ImageView(getActivity());
 
                     try {
-                        Drawable manaIconDrawable = getResources().getDrawable(iconId);
+                        Drawable manaIconDrawable;
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            manaIconDrawable = getResources().getDrawable(iconId, null);
+                        } else {
+                            manaIconDrawable = getResources().getDrawable(iconId);
+                        }
 
                         manaCostImage.setImageDrawable(manaIconDrawable);
 
-                        if (iconId == milIcon) {
-                            LinearLayout.LayoutParams paramsOverride =
-                                    new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 80),
-                                            Util.calculateHeight(
-                                                    manaIconDrawable.getIntrinsicWidth(),
-                                                    manaIconDrawable.getIntrinsicHeight(),
-                                                    Util.dpToPx(getActivity(), 80)
-                                            ));
+                        if (iconId == milIcon && manaIconDrawable != null) {
+                                LinearLayout.LayoutParams paramsOverride =
+                                        new LinearLayout.LayoutParams(Util.dpToPx(getActivity(), 80),
+                                                Util.calculateHeight(
+                                                        manaIconDrawable.getIntrinsicWidth(),
+                                                        manaIconDrawable.getIntrinsicHeight(),
+                                                        Util.dpToPx(getActivity(), 80)
+                                                ));
 
-                            manaCostImage.setLayoutParams(paramsOverride);
+                                manaCostImage.setLayoutParams(paramsOverride);
                         } else {
                             manaCostImage.setLayoutParams(params);
                         }
@@ -291,47 +387,17 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
                 }
             }
 
-            detailPager.setAdapter(detailPagerAdapter);
+            mDetailPager.setAdapter(detailPagerAdapter);
 
-            tabLayout.setupWithViewPager(detailPager);
+            tabLayout.setupWithViewPager(mDetailPager);
 
-            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-                    detailPager.setCurrentItem(tab.getPosition());
-                }
-
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab) {
-
-                }
-
-                @Override
-                public void onTabReselected(TabLayout.Tab tab) {
-
-                }
-            });
+            tabLayout.setOnTabSelectedListener(mTabSelectedListener);
         }
     }
 
     private void startPostponedEnterTransition() {
         if (mCardItem.getId() == mSelectedItemId) {
-            final ImageView iv = getCardImageView();
-
-            iv.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    iv.getViewTreeObserver().removeOnPreDrawListener(this);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        getActivity().startPostponedEnterTransition();
-                        Log.d("MtMU", "Starting postponed enter transitions");
-                    }
-
-                    return true;
-                }
-            });
+            mCardImageView.getViewTreeObserver().addOnPreDrawListener(mCardImagePreDrawListener);
         }
     }
 
@@ -356,8 +422,33 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
                     currencyFormat.format(priceItem.getFoilPrice())
             ));
         }
-        //Toast.makeText(getActivity(), "hello", Toast.LENGTH_SHORT).show();
     }
+
+    /*@Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return FavoriteLoader.newInstanceFavoriteByCardInstance(getActivity(), mCardItem.getId());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        ContentValues values = new ContentValues();
+
+        values.put(FavoriteContract.Favorites.CARD_ID, mCardItem.getId());
+
+        if (cursor.getCount() == 0) {
+            getActivity().getContentResolver().insert(FavoriteContract.Favorites.buildDirUri(),
+                    values);
+
+            Snackbar.make(mCoordinatorLayout, "Added to favorites", Snackbar.LENGTH_SHORT).show();
+        } else {
+            Snackbar.make(mCoordinatorLayout, "Removed from favorites", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        cursorLoader.abandon();
+    }*/
 
     private class CardDetailPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -393,7 +484,7 @@ public class CardViewDetailFragment extends Fragment implements GetPriceCallback
             if (position == 0) {
                 return "Rulings";
             } else if (position == 1) {
-                return "Printings";
+                return "Formats";
             }
 
             return super.getPageTitle(position);

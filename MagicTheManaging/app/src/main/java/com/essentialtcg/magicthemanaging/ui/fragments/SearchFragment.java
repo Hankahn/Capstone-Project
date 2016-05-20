@@ -319,26 +319,26 @@ public class SearchFragment extends Fragment
     }
 
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback =
-        new BottomSheetBehavior.BottomSheetCallback() {
+            new BottomSheetBehavior.BottomSheetCallback() {
 
-            @Override
-            public void onStateChanged(View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    fabAnimateIn(mFab);
-                    mFabLayoutParams.setBehavior(new ScrollFabBehavior(getActivity(), null));
-                    //mFab.setLayoutParams(mFabLayoutParams);
-                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    mBottomSheet.setVisibility(View.VISIBLE);
-                    mFabLayoutParams.setBehavior(null);
-                    mFab.setLayoutParams(mFabLayoutParams);
+                @Override
+                public void onStateChanged(View bottomSheet, int newState) {
+                    if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                        fabAnimateIn(mFab);
+                        mFabLayoutParams.setBehavior(new ScrollFabBehavior(getActivity(), null));
+                        //mFab.setLayoutParams(mFabLayoutParams);
+                    } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                        mBottomSheet.setVisibility(View.VISIBLE);
+                        mFabLayoutParams.setBehavior(null);
+                        mFab.setLayoutParams(mFabLayoutParams);
+                    }
                 }
-            }
 
-            @Override
-            public void onSlide(View bottomSheet, float slideOffset) {
+                @Override
+                public void onSlide(View bottomSheet, float slideOffset) {
 
-            }
-        };
+                }
+            };
 
     @Override
     public void onUpdateRecyclerViewCallback(int initialPosition, int currentPosition) {
@@ -518,7 +518,7 @@ public class SearchFragment extends Fragment
                 SpannableStringBuilder builder = new SpannableStringBuilder();
 
                 int imageHeightdp = 15;//icons.size() > 5 || (secondIcons != null && secondIcons.size() > 0) ?
-                        //10 : 15;
+                //10 : 15;
 
                 for(Integer iconId : icons) {
                     Drawable iconDrawable = ContextCompat.getDrawable(getActivity(), iconId);
@@ -600,14 +600,14 @@ public class SearchFragment extends Fragment
                         })
                         .into(holder.croppedImageView);
             } else {*/
-                Glide.with(getActivity())
-                        .load(imageUrl)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        //.skipMemoryCache(true)
-                        .dontTransform()
-                        .dontAnimate()
-                        .placeholder(R.mipmap.card_back)
-                        .into(holder.croppedImageView);
+            Glide.with(getActivity())
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                    //.skipMemoryCache(true)
+                    .dontTransform()
+                    .dontAnimate()
+                    .placeholder(R.mipmap.card_back)
+                    .into(holder.croppedImageView);
             //}
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

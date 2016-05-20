@@ -53,7 +53,7 @@ public class FavoritesResultsRecyclerAdapter extends
     @Override
     public FavoritesResultViewHolder onCreateViewHolder(final ViewGroup viewGroup, int viewType) {
         View itemView = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.list_item_search_card, viewGroup, false);
+                .inflate(R.layout.list_item_favorite_card, viewGroup, false);
 
         mContext = viewGroup.getContext();
 
