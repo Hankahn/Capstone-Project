@@ -16,4 +16,6 @@
     <string name="SET_GROUP_EXPANSION_DEFAULT">Pre-Block</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Closed</string>
+    <string name="action_sign_in">Sign-In</string>
+    <string name="action_sign_out">Sign-Out</string>
 </resources>
