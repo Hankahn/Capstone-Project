@@ -10,12 +10,20 @@
         <!--<item name="android:windowIsTranslucent">true</item>-->
     </style>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <!--<item name="android:statusBarColor">@color/colorPrimaryDark</item>-->
         <!--<item name="android:windowContentTransitions">true</item>-->
         <!--<item name="android:windowIsTranslucent">true</item>-->
+    </style>
+
+    <style name="AppTheme.SearchTextInputLayout" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColorHint">#FFFFFF</item>
+        <item name="android:textSize">12sp</item>
+        <item name="colorControlNormal">#FFFFFF</item>
+        <item name="colorControlActivated">#FFFFFF</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

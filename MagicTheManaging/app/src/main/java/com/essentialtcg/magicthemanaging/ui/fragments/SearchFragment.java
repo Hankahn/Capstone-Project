@@ -45,6 +45,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.essentialtcg.magicthemanaging.adapters.SearchResultsRecyclerAdapter;
 import com.essentialtcg.magicthemanaging.applications.AnalyticsApplication;
 import com.essentialtcg.magicthemanaging.behaviors.ScrollFabBehavior;
 import com.essentialtcg.magicthemanaging.callback.UpdateRecyclerViewCallback;
@@ -293,7 +294,7 @@ public class SearchFragment extends Fragment
             mRecyclerView.setVisibility(View.VISIBLE);
         }
 
-        mAdapter = new SearchResultsRecyclerAdapter(cursor);
+        mAdapter = new SearchResultsRecyclerAdapter(cursor, mSearchParameters, getActivity());
         //SearchResultsRecyclerAdapter adapter = new SearchResultsRecyclerAdapter(cursor);
 
         mAdapter.setHasStableIds(true);
@@ -396,7 +397,7 @@ public class SearchFragment extends Fragment
         });
     }
 
-    private class SearchResultsRecyclerAdapter extends
+    /*private class SearchResultsRecyclerAdapter extends
             RecyclerView.Adapter<SearchResultsRecyclerAdapter.SearchResultViewHolder> {
 
         private Cursor mCursor;
@@ -416,7 +417,7 @@ public class SearchFragment extends Fragment
             View view = getActivity().getLayoutInflater().inflate(
                     R.layout.list_item_search_card, parent, false);
             final SearchResultViewHolder viewHolder = new SearchResultViewHolder(view);
-            /*view.setOnClickListener(new View.OnClickListener() {
+            view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent viewCardIntent = new Intent(getActivity(), CardViewActivity.class);
@@ -425,7 +426,7 @@ public class SearchFragment extends Fragment
 
                     startActivity(viewCardIntent);
                 }
-            });*/
+            });
 
             return viewHolder;
         }
@@ -438,22 +439,22 @@ public class SearchFragment extends Fragment
             // Clean this up into a function since it will probably be used more than once
             String imageName = mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20");
 
-            /*try {
+            try {
                 imageName = URLEncoder.encode(imageName, "UTF-8");
             } catch (Exception ex) {
 
-            }*/
+            }
 
             final String imageUrl = String.format("http://www.essentialtcg.com/images/%s/%s.jpg?height=%s",
                     mCursor.getString(CardLoader.Query.SET_CODE),
                     imageName,
                     Util.dpToPx(getActivity(), 43));
             Log.d(TAG, "onBindViewHolder: " + imageUrl);
-            /*final String imageUrl = "http://www.essentialtcg.com/images/" +
+            final String imageUrl = "http://www.essentialtcg.com/images/" +
                     mCursor.getString(CardLoader.Query.SET_CODE) + "/" +
                     mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20") +
-                    ".jpg" *//*?cropyunits=100&cropxunits=100&crop=10,12,90,50";*//* + "?width=" +
-                    String.valueOf(Util.dpToPx(getActivity(), 50));*/
+                    ".jpg" ?cropyunits=100&cropxunits=100&crop=10,12,90,50"; + "?width=" +
+                    String.valueOf(Util.dpToPx(getActivity(), 50));
 
             if (mCursor.getString(CardLoader.Query.NAME2) != null) {
                 holder.nameTextView.setText(String.format(
@@ -576,7 +577,7 @@ public class SearchFragment extends Fragment
                 holder.featuredStatTextView.setText(R.string.NO_FEATURED_STAT);
             }
 
-            /*if (position == mCurrentPosition) {
+            if (position == mCurrentPosition) {
                 // TODO: Try skipMemoryCache
                 Glide.with(getActivity())
                         .load(imageUrl)
@@ -599,7 +600,7 @@ public class SearchFragment extends Fragment
                             }
                         })
                         .into(holder.croppedImageView);
-            } else {*/
+            } else {
             Glide.with(getActivity())
                     .load(imageUrl)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
@@ -659,8 +660,8 @@ public class SearchFragment extends Fragment
                 Bundle bundle = null;
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    /*setSharedElementEnterTransition(new ChangeImageTransform());
-                    setSharedElementReturnTransition(new ChangeImageTransform());*/
+                    setSharedElementEnterTransition(new ChangeImageTransform());
+                    setSharedElementReturnTransition(new ChangeImageTransform());
                     //setSharedElementEnterTransition(new android.transition.Fade());
 
                     bundle = ActivityOptionsCompat
@@ -685,26 +686,26 @@ public class SearchFragment extends Fragment
                 Log.d("MtMT", croppedImageView.getTransitionName() + " -> " +
                         croppedImageView.getTransitionName());
 
-                /*CardViewFragment cardViewFragment = CardViewFragment.newInstance(
-                position, mSearchParameters);*/
+                CardViewFragment cardViewFragment = CardViewFragment.newInstance(
+                position, mSearchParameters);
 
-                /*cardViewFragment.setSharedElementEnterTransition(new DetailTransition());
+                cardViewFragment.setSharedElementEnterTransition(new DetailTransition());
                 setSharedElementEnterTransition(new DetailTransition());
                 cardViewFragment.setEnterTransition(new Fade());
                 setExitTransition(new Fade());
-                setSharedElementReturnTransition(new DetailTransition());*/
+                setSharedElementReturnTransition(new DetailTransition());
 
-                /*FragmentTransitionUtil.getInstance(getFragmentManager())
+                FragmentTransitionUtil.getInstance(getFragmentManager())
                         .transition(R.id.fragment_container, this, cardViewFragment, croppedImageView,
-                                croppedImageView.getTransitionName());*/
+                                croppedImageView.getTransitionName());
 
-                /*getActivity().getSupportFragmentManager()
+                getActivity().getSupportFragmentManager()
                         .beginTransaction()
                         //.addSharedElement(croppedImageView, croppedImageView.getTransitionName())// destinationTransitionName)
                         //.add(R.id.fragment_container, cardViewFragment)
                         .replace(R.id.fragment_container, cardViewFragment)
                         .addToBackStack(null)
-                        .commit();*/
+                        .commit();
             }
 
         }
@@ -726,7 +727,7 @@ public class SearchFragment extends Fragment
             });
         }
 
-    }
+    }*/
 
     // Same animation that FloatingActionButton.Behavior uses to hide the FAB when the AppBarLayout exits
     private void fabAnimateOut(final FloatingActionButton button) {

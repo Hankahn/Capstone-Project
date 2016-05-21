@@ -43,7 +43,8 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColorHint="#FFFFFF">
+                android:textColorHint="#FFFFFF"
+                app:hintTextAppearance="@style/AppTheme.SearchTextInputLayout">
 
                 <EditText
                     android:id="@+id/name_filter_edit_text"
@@ -51,7 +52,6 @@
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:textColor="#FFFFFF"
-                    android:textColorHint="#FFFFFF"
                     android:backgroundTint="#FFFFFF"
                     android:hint="Name" />
 
@@ -60,7 +60,8 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColorHint="#FFFFFF">
+                android:textColorHint="#FFFFFF"
+                app:hintTextAppearance="@style/AppTheme.SearchTextInputLayout">
 
                 <EditText
                     android:id="@+id/set_filter_edit_text"
@@ -68,10 +69,9 @@
                     android:layout_height="wrap_content"
                     android:focusableInTouchMode="false"
                     android:singleLine="false"
-                    android:hint="Sets"
-                    android:textColorHint="#FFFFFF"
+                    android:textColor="#FFFFFF"
                     android:backgroundTint="#FFFFFF"
-                    android:textColor="#FFFFFF"/>
+                    android:hint="Sets" />
 
             </android.support.design.widget.TextInputLayout>
 
