@@ -40,6 +40,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,8 @@ public class MainActivity extends AppCompatActivity
     //implements ViewPager.OnPageChangeListener {
 
     private String TAG = "MainActivity";
+
+    private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
@@ -136,8 +139,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-
-        //checkLoginStatus();
     }
 
     private void checkLoginStatus() {
@@ -225,14 +226,19 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_sign_in) {
-            Intent signInIntent = new Intent(this, SignInActivity.class);
-            startActivity(signInIntent);
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+            startActivityForResult(signInIntent, RC_SIGN_IN);
             return true;
         }
 
         if (id == R.id.action_sign_out) {
-            Intent signInIntent = new Intent(this, SignInActivity.class);
-            startActivity(signInIntent);
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(Status status) {
+                            checkLoginStatus();
+                        }
+                    });
             return true;
         }
 
@@ -270,6 +276,21 @@ public class MainActivity extends AppCompatActivity
         }
 
         mDrawerLayout.closeDrawers();
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        checkLoginStatus();
+                    }
+                });
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
