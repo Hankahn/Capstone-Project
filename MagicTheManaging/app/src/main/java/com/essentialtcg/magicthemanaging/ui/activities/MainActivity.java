@@ -3,15 +3,13 @@ package com.essentialtcg.magicthemanaging.ui.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.SharedElementCallback;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,11 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.callback.DrawerAdapterCallback;
@@ -42,14 +36,9 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 public class MainActivity extends AppCompatActivity
         implements DrawerAdapterCallback,
         GoogleApiClient.OnConnectionFailedListener {
-    //implements ViewPager.OnPageChangeListener {
 
     private String TAG = "MainActivity";
 
@@ -74,6 +63,8 @@ public class MainActivity extends AppCompatActivity
     private ActionBarDrawerToggle mDrawerToggle;
     private MenuItem mSignInMenuItem;
     private MenuItem mSignOutMenuItem;
+
+    private boolean mSigningInOut = false;
 
     SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
 
@@ -189,6 +180,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+
+            mSigningInOut = true;
+
+            handleSignInResult(result);
+        }
+    }
+
+    @Override
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
 
@@ -226,19 +230,18 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_sign_in) {
-            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-            startActivityForResult(signInIntent, RC_SIGN_IN);
+            mSigningInOut = true;
+
+            signIn();
+
             return true;
         }
 
         if (id == R.id.action_sign_out) {
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            checkLoginStatus();
-                        }
-                    });
+            mSigningInOut = true;
+
+            signOut();
+
             return true;
         }
 
@@ -296,7 +299,7 @@ public class MainActivity extends AppCompatActivity
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult: " + result.isSuccess());
 
-        boolean loggedIn = false;
+        boolean loggedIn;
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = preferences.edit();
@@ -310,6 +313,12 @@ public class MainActivity extends AppCompatActivity
             editor.putString("PREF_LOGGED_IN_ID", account.getId());
             editor.putString("PREF_LOGGED_IN_NAME", account.getDisplayName());
             editor.putString("PREF_LOGGED_IN_EMAIL", account.getEmail());
+
+            if (mSigningInOut) {
+                Snackbar.make(findViewById(R.id.main_coord),
+                        "Successfully Logged In", Snackbar.LENGTH_SHORT).show();
+                mSigningInOut = false;
+            }
         } else {
             loggedIn = false;
 
@@ -317,6 +326,12 @@ public class MainActivity extends AppCompatActivity
             editor.putString("PREF_LOGGED_IN_ID", "");
             editor.putString("PREF_LOGGED_IN_NAME", "");
             editor.putString("PREF_LOGGED_IN_EMAIL", "");
+
+            if (mSigningInOut) {
+                Snackbar.make(findViewById(R.id.main_coord),
+                        "Successfully Logged Out", Snackbar.LENGTH_SHORT).show();
+                mSigningInOut = false;
+            }
         }
 
         if (mSignOutMenuItem != null) {
