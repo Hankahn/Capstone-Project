@@ -1,20 +1,17 @@
 package com.essentialtcg.magicthemanaging.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.callback.DrawerAdapterCallback;
-import com.essentialtcg.magicthemanaging.ui.activities.SignInActivity;
 
 /**
  * Created by Shawn on 4/18/2016.
@@ -39,7 +36,6 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
 
         int HolderId;
 
-        Button mSignInButton;
         TextView mTextView;
         ImageView mImageView;
         ImageView mProfile;
@@ -54,7 +50,6 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
                 mImageView = (ImageView) itemView.findViewById(R.id.rowIcon);
                 HolderId = 1;
             } else {
-                mSignInButton = (Button) itemView.findViewById(R.id.sign_in_button);
                 mName = (TextView) itemView.findViewById(R.id.name);
                 mEmail = (TextView) itemView.findViewById(R.id.email);
                 mProfile = (ImageView) itemView.findViewById(R.id.profile_picture);
@@ -121,18 +116,10 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
                 holder.mName.setText(displayName);
                 holder.mEmail.setVisibility(View.VISIBLE);
                 holder.mEmail.setText(email);
-                holder.mSignInButton.setVisibility(View.GONE);
             } else {
                 holder.mProfile.setVisibility(View.INVISIBLE);
                 holder.mName.setVisibility(View.INVISIBLE);
                 holder.mEmail.setVisibility(View.INVISIBLE);
-                holder.mSignInButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent signInIntent = new Intent(mContext, SignInActivity.class);
-                        mContext.startActivity(signInIntent);
-                    }
-                });
             }
         }
     }
