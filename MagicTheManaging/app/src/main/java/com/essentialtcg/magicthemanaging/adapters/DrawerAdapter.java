@@ -10,8 +10,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.callback.DrawerAdapterCallback;
+import com.essentialtcg.magicthemanaging.transforms.RoundImageTransform;
 
 /**
  * Created by Shawn on 4/18/2016.
@@ -25,10 +28,6 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
 
     private String mNavTitles[];
     private int mIcons[];
-
-    private String mName;
-    private int mProfile;
-    private String mEmail;
 
     private DrawerAdapterCallback mDrawerAdapterCallback;
 
@@ -64,9 +63,6 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
         mContext = context;
         mNavTitles = titles;
         mIcons = icons;
-        mName = name;
-        mEmail = email;
-        mProfile = profile;
         mDrawerAdapterCallback = drawerAdapterCallback;
     }
 
@@ -108,10 +104,21 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
             boolean isLoggedIn = preferences.getBoolean("PREF_LOGGED_IN", false);
             String displayName = preferences.getString("PREF_LOGGED_IN_NAME", "");
             String email = preferences.getString("PREF_LOGGED_IN_EMAIL", "");
+            String profileImageUrl = preferences.getString("PREF_PROFILE_IMAGE_URL", "");
 
             if (isLoggedIn) {
                 holder.mProfile.setVisibility(View.VISIBLE);
-                holder.mProfile.setImageResource(mProfile);
+
+                if (!profileImageUrl.equals("")) {
+                    Glide.with(mContext)
+                            .load(profileImageUrl)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            //.skipMemoryCache(true)
+                            .transform(new RoundImageTransform(mContext))
+                            .dontAnimate()
+                            .into(holder.mProfile);
+                }
+
                 holder.mName.setVisibility(View.VISIBLE);
                 holder.mName.setText(displayName);
                 holder.mEmail.setVisibility(View.VISIBLE);
