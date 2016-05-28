@@ -41,11 +41,12 @@ public class CardContract {
         String IMAGE_NAME2 = "ImageName2";
         String FLAVOR_TEXT = "Flavor";
         String FLAVOR_TEXT2 = "Flavor2";
-        String DECK_CARD_ID = "deck_card.ID";
-        String CARD_ID = "CardID";
+        String IS_FAVORITE = "(CASE WHEN favorite.CardID IS null THEN 0 ELSE 1 END) IsFavorite";
+        //String DECK_CARD_ID = "deck_card.ID";
+        //String CARD_ID = "CardID";
         String DECK_ID = "DeckID";
-        String QUANTITY_MAIN = "QuantityMain";
-        String QUANTITY_SIDE = "QuantitySide";
+        //String QUANTITY_MAIN = "QuantityMain";
+        //String QUANTITY_SIDE = "QuantitySide";
 
     }
 
