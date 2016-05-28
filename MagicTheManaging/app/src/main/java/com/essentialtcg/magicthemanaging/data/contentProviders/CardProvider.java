@@ -27,7 +27,8 @@ public class CardProvider extends ContentProvider {
 
     interface Tables {
         String CARD = "card " +
-                "INNER JOIN [set] ON card.SetCode = [set].Code";
+                "INNER JOIN [set] ON card.SetCode = [set].Code " +
+                "LEFT OUTER JOIN favorite ON card.ID = favorite.CardID";
         String CARD_DECK_CARD = "card INNER JOIN deck_card ON card.ID = deck_card.CardID";
         String CARD_FAVORITE = "card " +
                 "INNER JOIN [set] ON card.SetCode = [set].Code " +
