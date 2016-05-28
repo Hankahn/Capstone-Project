@@ -34,6 +34,8 @@ public class SetPickerDialogFragment extends DialogFragment implements
 
     private final String TAG = "SetPickerDialogFragment";
 
+    private final int SET_PICKER_LOADER_ID = 3;
+
     private CardSearchParameters mSearchParameters;
 
     private static final String SET_PICKER_POSITION_TAG = "SET_PICKER_POSITION";
@@ -95,7 +97,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
 
         getDialog().setTitle(R.string.SET_PICKER_DIALOG_TITLE);
 
-        LoadData();
+        loadData();
 
         return rootView;
     }
@@ -143,8 +145,8 @@ public class SetPickerDialogFragment extends DialogFragment implements
         mRecyclerView.setAdapter(null);
     }
 
-    private void LoadData() {
-        getLoaderManager().restartLoader(0, null, this);
+    private void loadData() {
+        getLoaderManager().restartLoader(SET_PICKER_LOADER_ID, null, this);
     }
 
     private class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
