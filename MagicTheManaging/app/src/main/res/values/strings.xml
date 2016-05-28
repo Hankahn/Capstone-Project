@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Magic the Managing</string>
     <string name="action_settings">Settings</string>
+    <bool name="multipane">false</bool>
 
     <!-- TODO: Remove or change this placeholder cardText -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
