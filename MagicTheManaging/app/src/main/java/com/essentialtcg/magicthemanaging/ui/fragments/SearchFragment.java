@@ -34,6 +34,7 @@ import com.essentialtcg.magicthemanaging.adapters.SearchResultsRecyclerAdapter;
 import com.essentialtcg.magicthemanaging.behaviors.ScrollFabBehavior;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.data.items.SetItem;
+import com.essentialtcg.magicthemanaging.events.UpdateSearchCardViewEvent;
 import com.essentialtcg.magicthemanaging.events.UpdateRecyclerViewPositionEvent;
 import com.essentialtcg.magicthemanaging.events.UpdateRecyclerViewPositionReturnEvent;
 import com.essentialtcg.magicthemanaging.ui.activities.MainActivity;
@@ -133,7 +134,9 @@ public class SearchFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
-        ((MainActivity)getActivity()).getSupportActionBar().setSubtitle("Search Results");
+        if (((MainActivity)getActivity()).getSupportActionBar() != null) {
+            ((MainActivity) getActivity()).getSupportActionBar().setSubtitle("Search Results");
+        }
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.card_recycler_view);
         mEmptyResultTextView = (TextView) rootView.findViewById(R.id.empty_reset_text_view);
@@ -220,6 +223,8 @@ public class SearchFragment extends Fragment
                 mPosition = 0;
 
                 loadData();
+
+                EventBus.getDefault().post(new UpdateSearchCardViewEvent(mSearchParameters));
             }
         });
 
