@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="178dp"
-    android:background="#00FF00"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:weightSum="1">
 
@@ -44,7 +44,6 @@
         android:id="@+id/profile_picture"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@mipmap/soi_m"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="38dp"
         android:visibility="invisible" />
