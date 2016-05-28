@@ -26,6 +26,7 @@ import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
 import com.essentialtcg.magicthemanaging.data.transforms.CardTransform;
 import com.essentialtcg.magicthemanaging.events.UpdateFavoritesEvent;
 import com.essentialtcg.magicthemanaging.events.UpdateRecyclerViewPositionEvent;
+import com.essentialtcg.magicthemanaging.events.UpdateSearchCardViewEvent;
 import com.essentialtcg.magicthemanaging.events.UpdateViewPagerPositionEvent;
 import com.essentialtcg.magicthemanaging.ui.activities.CardViewActivity;
 import com.google.android.gms.analytics.HitBuilders;
@@ -148,8 +149,10 @@ public class CardViewFragment extends Fragment
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+        if (getActivity().getClass().equals(CardViewActivity.class)) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         mPager = (ViewPager) rootView.findViewById(R.id.card_view_pager);
         mPagerAdapter = new CardViewPagerAdapter(getChildFragmentManager());
@@ -222,6 +225,13 @@ public class CardViewFragment extends Fragment
         if (mSearchParameters == null) {
             getLoaderManager().restartLoader(CARD_VIEW_LOADER_ID, null, this);
         }
+    }
+
+    @Subscribe
+    public void onUpdateSearchCardViewEvent(UpdateSearchCardViewEvent event) {
+        mSearchParameters = event.searchParameters;
+
+        getLoaderManager().restartLoader(CARD_VIEW_LOADER_ID, null, this);
     }
 
     private void sendViewedCardName() {
