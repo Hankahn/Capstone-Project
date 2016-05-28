@@ -15,8 +15,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Display;
@@ -39,10 +38,13 @@ import com.essentialtcg.magicthemanaging.callback.GetPriceCallback;
 import com.essentialtcg.magicthemanaging.data.contracts.FavoriteContract;
 import com.essentialtcg.magicthemanaging.data.items.PriceItem;
 import com.essentialtcg.magicthemanaging.data.loaders.FavoriteLoader;
+import com.essentialtcg.magicthemanaging.events.UpdateFavoritesEvent;
 import com.essentialtcg.magicthemanaging.tasks.GetPriceAsyncTask;
 import com.essentialtcg.magicthemanaging.utils.Util;
 import com.essentialtcg.magicthemanaging.data.items.CardItem;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -53,15 +55,12 @@ import java.util.ArrayList;
  * Created by Shawn on 4/9/2016.
  */
 public class CardViewDetailFragment extends Fragment
-        implements GetPriceCallback {//, LoaderManager.LoaderCallbacks<Cursor> {
+        implements GetPriceCallback {
 
     private static final String TAG = "CardViewDetailFragment";
 
     public static final String ARG_CARD_TO_SHOW = "CARD_TO_SHOW";
-    //public static final String ARG_ITEM_ID = "ITEM_ID";
     public static final String ARG_SELECTED_ITEM_ID = "START_ID";
-
-    private static final int LOADER_ID = 0;
 
     private CoordinatorLayout mCoordinatorLayout;
     private View mRootView;
@@ -97,7 +96,7 @@ public class CardViewDetailFragment extends Fragment
     View.OnClickListener mFavoriteClickListener = new View.OnClickListener() {
 
         @Override
-        public void onClick(View v) {
+        public void onClick(View view) {
             ContentValues values = new ContentValues();
 
             values.put(FavoriteContract.Favorites.CARD_ID, mCardItem.getId());
@@ -112,6 +111,12 @@ public class CardViewDetailFragment extends Fragment
                     getActivity().getContentResolver().insert(FavoriteContract.Favorites.buildDirUri(),
                             values);
 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full, null));
+                    } else {
+                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full));
+                    }
+
                     Snackbar.make(mCoordinatorLayout, "Added to favorites", Snackbar.LENGTH_SHORT).show();
                 } else {
                     cursor.moveToFirst();
@@ -122,14 +127,20 @@ public class CardViewDetailFragment extends Fragment
                             FavoriteContract.Favorites._ID + " = ?",
                             new String[] { String.valueOf(favoriteId) });
 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty, null));
+                    } else {
+                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty));
+                    }
+
                     Snackbar.make(mCoordinatorLayout, "Removed from favorites", Snackbar.LENGTH_SHORT).show();
                 }
+
+                EventBus.getDefault().post(new UpdateFavoritesEvent());
             } else {
                 Log.d(TAG, String.format("onClick: Unable to determine if card already a favorite: ",
                         mCardItem.getId()));
             }
-
-            //getLoaderManager().initLoader(LOADER_ID, null, CardViewDetailFragment.this);
         }
 
     };
@@ -145,7 +156,9 @@ public class CardViewDetailFragment extends Fragment
         }
 
         @Override
-        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+        public boolean onResourceReady(GlideDrawable resource, String model,
+                                       Target<GlideDrawable> target, boolean isFromMemoryCache,
+                                       boolean isFirstResource) {
             startPostponedEnterTransition();
 
             return false;
@@ -189,10 +202,6 @@ public class CardViewDetailFragment extends Fragment
             mCardItem = getArguments().getParcelable(ARG_CARD_TO_SHOW);
         }
 
-        /*if (getArguments().containsKey(ARG_ITEM_ID)) {
-            mItemId = getArguments().getLong(ARG_ITEM_ID);
-        }*/
-
         if (getArguments().containsKey(ARG_SELECTED_ITEM_ID)) {
             mSelectedItemId = getArguments().getLong(ARG_SELECTED_ITEM_ID);
         }
@@ -212,10 +221,6 @@ public class CardViewDetailFragment extends Fragment
         mGetPriceTask.execute(url);
     }
 
-    /*public CardViewActivity getActivityCast() {
-        return (CardViewActivity) getActivity();
-    }*/
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -229,7 +234,7 @@ public class CardViewDetailFragment extends Fragment
         return (mGetPriceTask != null) && (mGetPriceTask.getStatus() == AsyncTask.Status.RUNNING);
     }
 
-    @Override
+    /*@Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -244,12 +249,14 @@ public class CardViewDetailFragment extends Fragment
         }
 
         bindViews();
-    }
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_card_view_detail, container, false);
+
+        bindViews();
 
         return mRootView;
     }
@@ -303,6 +310,20 @@ public class CardViewDetailFragment extends Fragment
             }
 
             mFavoriteButton.setOnClickListener(mFavoriteClickListener);
+
+            if (mCardItem.isFavorite()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full, null));
+                } else {
+                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full));
+                }
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty, null));
+                } else {
+                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty));
+                }
+            }
 
             Glide.with(getActivity())
                     .load(imageUrl)
@@ -424,32 +445,6 @@ public class CardViewDetailFragment extends Fragment
         }
     }
 
-    /*@Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return FavoriteLoader.newInstanceFavoriteByCardInstance(getActivity(), mCardItem.getId());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        ContentValues values = new ContentValues();
-
-        values.put(FavoriteContract.Favorites.CARD_ID, mCardItem.getId());
-
-        if (cursor.getCount() == 0) {
-            getActivity().getContentResolver().insert(FavoriteContract.Favorites.buildDirUri(),
-                    values);
-
-            Snackbar.make(mCoordinatorLayout, "Added to favorites", Snackbar.LENGTH_SHORT).show();
-        } else {
-            Snackbar.make(mCoordinatorLayout, "Removed from favorites", Snackbar.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        cursorLoader.abandon();
-    }*/
-
     private class CardDetailPagerAdapter extends FragmentStatePagerAdapter {
 
         private final int NUM_TABS = 2;
@@ -472,6 +467,11 @@ public class CardViewDetailFragment extends Fragment
             }
 
             return null;
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            return PagerAdapter.POSITION_NONE;
         }
 
         @Override
