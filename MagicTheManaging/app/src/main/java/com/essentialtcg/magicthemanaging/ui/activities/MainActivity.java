@@ -61,9 +61,7 @@ public class MainActivity extends AppCompatActivity
     private String MENU_TITLES[] = { "Search", "Decks", "Collection", "Favorites" };
     private int MENU_ICONS[] = { R.mipmap.ic_search_black_18, R.mipmap.ic_content_copy_black_18,
             R.mipmap.ic_check_box_black_24, R.mipmap.ic_star_rate_black_18 };
-    private String NAME = "Shawn M. Sullivan";
-    private String EMAIL = "hankahn@gmail.com";
-    private int PROFILE = R.mipmap.soi_m;
+    private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private RecyclerView mDrawerRecycler;
     private RecyclerView.Adapter mDrawerAdapter;
@@ -92,8 +90,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.search_toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.search_toolbar);
+        setSupportActionBar(mToolbar);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -103,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         mDrawerRecycler = (RecyclerView) findViewById(R.id.search_recycler_view);
         mDrawerRecycler.setHasFixedSize(true);
 
-        mDrawerAdapter = new DrawerAdapter(this, MENU_TITLES, MENU_ICONS, NAME, EMAIL, PROFILE, this);
+        mDrawerAdapter = new DrawerAdapter(this, MENU_TITLES, MENU_ICONS, this);
 
         mDrawerRecycler.setAdapter(mDrawerAdapter);
 
@@ -111,7 +109,7 @@ public class MainActivity extends AppCompatActivity
 
         mDrawerRecycler.setLayoutManager(mDrawerLayoutManager);
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar,
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
                 R.string.drawer_open, R.string.drawer_close);
 
         mDrawerLayout.addDrawerListener(mDrawerToggle);
@@ -126,6 +124,8 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mFragment, "SearchFragment")
                     .commit();
+
+            mToolbar.setSubtitle("Search Results");
 
             if (getResources().getBoolean(R.bool.multipane)) {
                 // TODO: Pull this from the sharedpreferences instead
@@ -300,9 +300,7 @@ public class MainActivity extends AppCompatActivity
                 mFragment = new SearchFragment();
 
                 if (getResources().getBoolean(R.bool.multipane)) {
-                    /*getSupportFragmentManager().beginTransaction()
-                            .remove(rightFragment)
-                            .commit();*/
+                    mToolbar.setSubtitle("Search Results");
 
                     // TODO: Pull this from the sharedpreferences instead
                     CardSearchParameters cardSearchParameters = new CardSearchParameters();
@@ -331,6 +329,8 @@ public class MainActivity extends AppCompatActivity
                 mFragment = new FavoritesFragment();
 
                 if (getResources().getBoolean(R.bool.multipane)) {
+                    mToolbar.setSubtitle("Favorites");
+
                     CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, null);
 
                     getSupportFragmentManager().beginTransaction()
