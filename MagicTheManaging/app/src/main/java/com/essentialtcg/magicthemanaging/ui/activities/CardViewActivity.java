@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.Window;
 
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
@@ -36,7 +37,12 @@ public class CardViewActivity extends AppCompatActivity
             postponeEnterTransition();
 
             Window window = getWindow();
-            window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark, null));
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+            }
         }
 
         mStartPosition = 0;
@@ -69,9 +75,6 @@ public class CardViewActivity extends AppCompatActivity
                         .replace(android.R.id.content, cardViewFragment, "CardViewFragment")
                         .commit();
             }
-        } else {
-            CardViewFragment cardViewFragment = (CardViewFragment) getSupportFragmentManager()
-                    .findFragmentByTag("CardViewFragment");
         }
     }
 
@@ -85,6 +88,18 @@ public class CardViewActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
         outState.putInt(INITIAL_CARD_POSITION, mStartPosition);
         outState.putInt(CURRENT_CARD_POSITION, mCurrentPosition);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
