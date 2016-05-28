@@ -46,6 +46,7 @@ public class CardTransform {
             cardItem.setSecondLoyalty(cursor.getString(CardLoader.Query.LOYALTY2));
             cardItem.setSecondCardNumber(cursor.getString(CardLoader.Query.CARD_NUMBER2));
             cardItem.setSecondImageName(cursor.getString(CardLoader.Query.IMAGE_NAME2));
+            cardItem.setIsFavorite(cursor.getInt(CardLoader.Query.IS_FAVORITE) > 0);
 
             if (cardItem.getSecondName() != null && cardItem.getSecondName().length() >  0) {
                 cardItem.setHasSecondCard(true);
