@@ -1,14 +1,11 @@
 package com.essentialtcg.magicthemanaging.adapters;
 
-import android.content.ContentProvider;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
@@ -16,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,12 +20,15 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.essentialtcg.magicthemanaging.R;
+import com.essentialtcg.magicthemanaging.callback.LoadCardDetailCallback;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
-import com.essentialtcg.magicthemanaging.ui.activities.CardViewActivity;
-import com.essentialtcg.magicthemanaging.ui.activities.MainActivity;
+import com.essentialtcg.magicthemanaging.events.UpdateRecyclerViewPositionEvent;
+import com.essentialtcg.magicthemanaging.events.UpdateViewPagerPositionEvent;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
 import com.essentialtcg.magicthemanaging.utils.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
@@ -43,14 +42,34 @@ public class SearchResultsRecyclerAdapter extends
 
     private int mCursorPosition;
     private Cursor mCursor;
-    private static Context mContext;
+    private int mSelectedPosition;
+    private Context mContext;
     private CardSearchParameters mSearchParameters;
+    private LoadCardDetailCallback mCardDetailCallback;
+    private boolean mShowFavorites;
+
+    private SearchResultsRecyclerAdapter(Cursor cursor, boolean showFavorites, Context context,
+                                         LoadCardDetailCallback cardDetailCallback) {
+        mCursor = cursor;
+        mShowFavorites = showFavorites;
+        mContext = context;
+        mCardDetailCallback = cardDetailCallback;
+    }
 
     public SearchResultsRecyclerAdapter(Cursor cursor, CardSearchParameters searchParameters,
-                                        Context context) {
+                                        Context context, LoadCardDetailCallback cardDetailCallback) {
         mCursor = cursor;
         mSearchParameters = searchParameters;
         mContext = context;
+        mCardDetailCallback = cardDetailCallback;
+    }
+
+    public static SearchResultsRecyclerAdapter newFavoritesInstance(Cursor cursor, Context context,
+                    LoadCardDetailCallback cardDetailCallback) {
+        SearchResultsRecyclerAdapter newInstance = new SearchResultsRecyclerAdapter(cursor, true,
+                context, cardDetailCallback);
+
+        return newInstance;
     }
 
     @Override
@@ -73,14 +92,17 @@ public class SearchResultsRecyclerAdapter extends
         mCursorPosition = position;
         mCursor.moveToPosition(position);
 
+
+        if (mContext.getResources().getBoolean(R.bool.multipane)) {
+            if (position == mSelectedPosition) {
+                holder.cardView.setCardBackgroundColor(mContext.getResources().getColor(R.color.gray));
+            } else {
+                holder.cardView.setCardBackgroundColor(mContext.getResources().getColor(R.color.white));
+            }
+        }
+
         // Clean this up into a function since it will probably be used more than once
         String imageName = mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20");
-
-            /*try {
-                imageName = URLEncoder.encode(imageName, "UTF-8");
-            } catch (Exception ex) {
-
-            }*/
 
         final String imageUrl = String.format("http://www.essentialtcg.com/images/%s/%s.jpg?height=%s",
                 mCursor.getString(CardLoader.Query.SET_CODE),
@@ -214,30 +236,6 @@ public class SearchResultsRecyclerAdapter extends
             holder.featuredStatTextView.setText(R.string.NO_FEATURED_STAT);
         }
 
-            /*if (position == mCurrentPosition) {
-                // TODO: Try skipMemoryCache
-                Glide.with(getActivity())
-                        .load(imageUrl)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        .skipMemoryCache(true)
-                        .listener(new RequestListener<String, GlideDrawable>() {
-                            @Override
-                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                //getActivity().startPostponedEnterTransition();
-                                //startPostponedEnterTransition(holder.croppedImageView);
-
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                //startPostponedEnterTransition(holder.croppedImageView);
-
-                                return false;
-                            }
-                        })
-                        .into(holder.croppedImageView);
-            } else {*/
         Glide.with(mContext)
                 .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
@@ -246,7 +244,6 @@ public class SearchResultsRecyclerAdapter extends
                 .dontAnimate()
                 .placeholder(R.mipmap.card_back)
                 .into(holder.croppedImageView);
-        //}
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String transitionName = String.format("source_%s",
@@ -261,9 +258,16 @@ public class SearchResultsRecyclerAdapter extends
         return mCursor.getCount();
     }
 
+    public void setCurrentPosition(int position) {
+        notifyItemChanged(mSelectedPosition);
+        mSelectedPosition = position;
+        notifyItemChanged(mSelectedPosition);
+    }
+
     public class SearchResultViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
+        public CardView cardView;
         public ImageView croppedImageView;
         public TextView nameTextView;
         public TextView setRarityTextView;
@@ -275,6 +279,7 @@ public class SearchResultsRecyclerAdapter extends
         public SearchResultViewHolder(View view) {
             super(view);
 
+            cardView = (CardView) view.findViewById(R.id.card_card_view);
             croppedImageView = (ImageView) view.findViewById(R.id.cropped_image_view);
             nameTextView = (TextView) view.findViewById(R.id.card_name_text_view);
             setRarityTextView = (TextView) view.findViewById(R.id.set_rarity_text_view);
@@ -290,78 +295,24 @@ public class SearchResultsRecyclerAdapter extends
         public void onClick(View view) {
             int position = this.getLayoutPosition();
 
-            Intent viewCardIntent = new Intent(mContext, CardViewActivity.class);
+            if (mContext.getResources().getBoolean(R.bool.multipane)) {
+                notifyItemChanged(mSelectedPosition);
+                mSelectedPosition = position;
+                notifyItemChanged(mSelectedPosition);
 
-            View croppedImageView = view.findViewById(R.id.cropped_image_view);
+                EventBus.getDefault().post(new UpdateViewPagerPositionEvent(position));
+            } else {
+                View croppedImageView = view.findViewById(R.id.cropped_image_view);
 
-            Bundle bundle = null;
+                mCursor.moveToPosition(position);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    /*setSharedElementEnterTransition(new ChangeImageTransform());
-                    setSharedElementReturnTransition(new ChangeImageTransform());*/
-                //setSharedElementEnterTransition(new android.transition.Fade());
+                long selectedItemId = mCursor.getLong(CardLoader.Query._ID);
 
-                bundle = ActivityOptionsCompat
-                        .makeSceneTransitionAnimation(
-                                (MainActivity) mContext,
-                                croppedImageView,
-                                croppedImageView.getTransitionName())
-                        .toBundle();
+                mCardDetailCallback.onLoadCardDetailCallback(position, selectedItemId,
+                        croppedImageView, mSearchParameters);
             }
-
-            mCursor.moveToPosition(position);
-
-            viewCardIntent.putExtra(CardViewActivity.INITIAL_CARD_POSITION, position);
-            viewCardIntent.putExtra(CardViewActivity.SELECTED_ITEM_ID,
-                    mCursor.getLong(CardLoader.Query._ID));
-            viewCardIntent.putExtra(CardViewActivity.SEARCH_PARAMETERS, mSearchParameters);
-
-            //croppedImageAnimateOut((ImageView) croppedImageView);
-
-            mContext.startActivity(viewCardIntent, bundle);
-
-            Log.d("MtMT", croppedImageView.getTransitionName() + " -> " +
-                    croppedImageView.getTransitionName());
-
-                /*CardViewFragment cardViewFragment = CardViewFragment.newInstance(
-                position, mSearchParameters);*/
-
-                /*cardViewFragment.setSharedElementEnterTransition(new DetailTransition());
-                setSharedElementEnterTransition(new DetailTransition());
-                cardViewFragment.setEnterTransition(new Fade());
-                setExitTransition(new Fade());
-                setSharedElementReturnTransition(new DetailTransition());*/
-
-                /*FragmentTransitionUtil.getInstance(getFragmentManager())
-                        .transition(R.id.fragment_container, this, cardViewFragment, croppedImageView,
-                                croppedImageView.getTransitionName());*/
-
-                /*getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        //.addSharedElement(croppedImageView, croppedImageView.getTransitionName())// destinationTransitionName)
-                        //.add(R.id.fragment_container, cardViewFragment)
-                        .replace(R.id.fragment_container, cardViewFragment)
-                        .addToBackStack(null)
-                        .commit();*/
         }
 
-    }
-
-    private void startPostponedEnterTransition(ImageView imageView) {
-        final ImageView iv = imageView;
-
-        iv.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                iv.getViewTreeObserver().removeOnPreDrawListener(this);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ((MainActivity) mContext).startPostponedEnterTransition();
-                }
-
-                return true;
-            }
-        });
     }
 
 }
