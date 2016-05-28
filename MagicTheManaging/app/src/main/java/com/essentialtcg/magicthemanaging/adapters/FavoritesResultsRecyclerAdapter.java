@@ -1,30 +1,22 @@
 package com.essentialtcg.magicthemanaging.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
-import com.essentialtcg.magicthemanaging.ui.activities.CardViewActivity;
 import com.essentialtcg.magicthemanaging.ui.viewHolders.FavoritesResultViewHolder;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
 import com.essentialtcg.magicthemanaging.utils.Util;
@@ -53,7 +45,7 @@ public class FavoritesResultsRecyclerAdapter extends
     @Override
     public FavoritesResultViewHolder onCreateViewHolder(final ViewGroup viewGroup, int viewType) {
         View itemView = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.list_item_favorite_card, viewGroup, false);
+                .inflate(R.layout.list_item_search_card, viewGroup, false);
 
         mContext = viewGroup.getContext();
 
@@ -119,8 +111,6 @@ public class FavoritesResultsRecyclerAdapter extends
 
         String manaCost = mCursor.getString(CardLoader.Query.MANA_COST);
         String secondManaCost = mCursor.getString(CardLoader.Query.MANA_COST2);
-
-        //LinearLayout manaCostContainer = holder.manaCostContainerView;
 
         if (manaCost.length() > 0) {
             ArrayList<Integer> icons = CardUtil.parseIcons(manaCost);
@@ -192,18 +182,6 @@ public class FavoritesResultsRecyclerAdapter extends
             holder.featuredStatTextView.setText(R.string.NO_FEATURED_STAT);
         }
 
-        //Picasso.with(getActivity()).setIndicatorsEnabled(true);
-
-            /*Picasso.with(getActivity())
-                    .load(imageUrl)
-                    .placeholder(R.mipmap.sample_card_crop)
-                    .into(holder.croppedImageView);*/
-
-            /*PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity())
-                    .load(imageUrl)
-                    .placeholder(R.mipmap.sample_card_crop)
-                    .into(holder.croppedImageView);*/
-
         // TODO: Try skipMemoryCache
         Glide.with(mContext)
                 .load(imageUrl)
@@ -214,7 +192,6 @@ public class FavoritesResultsRecyclerAdapter extends
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             holder.croppedImageView.setTransitionName(
                     "source_" + String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
-            //Log.d("MtMT", String.valueOf(mCursor.getInt(CardLoader.Query._ID)));
         }
     }
 
