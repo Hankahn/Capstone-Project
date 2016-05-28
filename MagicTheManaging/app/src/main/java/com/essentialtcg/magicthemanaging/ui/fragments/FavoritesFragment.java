@@ -86,7 +86,9 @@ public class FavoritesFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_favorites, container, false);
 
-        ((MainActivity)getActivity()).getSupportActionBar().setSubtitle("Favorites");
+        if (((MainActivity) getActivity()).getSupportActionBar() != null) {
+            ((MainActivity) getActivity()).getSupportActionBar().setSubtitle("Favorites");
+        }
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.favorites_recycler_view);
         mEmptyResultTextView = (TextView) rootView.findViewById(R.id.favorites_empty_reset_text_view);
