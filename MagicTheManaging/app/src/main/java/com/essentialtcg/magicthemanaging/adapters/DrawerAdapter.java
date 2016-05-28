@@ -58,7 +58,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.DrawerView
 
     }
 
-    public DrawerAdapter(Context context, String titles[], int icons[], String name, String email, int profile,
+    public DrawerAdapter(Context context, String titles[], int icons[],
                          DrawerAdapterCallback drawerAdapterCallback) {
         mContext = context;
         mNavTitles = titles;
