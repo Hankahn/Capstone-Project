@@ -64,7 +64,8 @@ public class CardLoader extends CursorLoader {
                 CardContract.Cards.CARD_NUMBER2,
                 CardContract.Cards.IMAGE_NAME2,
                 CardContract.Cards.FLAVOR_TEXT,
-                CardContract.Cards.FLAVOR_TEXT2
+                CardContract.Cards.FLAVOR_TEXT2,
+                CardContract.Cards.IS_FAVORITE
         };
 
         int _ID = 0;
@@ -92,6 +93,7 @@ public class CardLoader extends CursorLoader {
         int IMAGE_NAME2 = 21;
         int FLAVOR_TEXT = 22;
         int FLAVOR_TEXT2 = 23;
+        int IS_FAVORITE = 24;
 
     }
 
