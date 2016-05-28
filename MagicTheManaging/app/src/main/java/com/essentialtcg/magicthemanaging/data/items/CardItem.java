@@ -36,6 +36,7 @@ public class CardItem implements Parcelable {
     private String secondLoyalty;
     private String secondCardNumber;
     private String secondImageName;
+    private boolean isFavorite;
 
     public CardItem() {
 
@@ -282,6 +283,14 @@ public class CardItem implements Parcelable {
 
     public void setSecondImageName(String secondImageName) {
         this.secondImageName = secondImageName;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setIsFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     @Override
