@@ -9,6 +9,24 @@ import java.util.ArrayList;
  */
 public class SetArrayList extends ArrayList<SetItem> {
 
+    public SetArrayList() {
+
+    }
+
+    public SetArrayList(String codesString) {
+        String[] setCodes = codesString.split(",");
+
+        this.clear();
+
+        for (String setCode : setCodes) {
+            SetItem setItem = new SetItem();
+
+            setItem.setName(setCode);
+
+            this.add(setItem);
+        }
+    }
+
     public boolean containsSetItem(SetItem setItem) {
         if (this.size() == 0) {
             return false;
@@ -30,6 +48,20 @@ public class SetArrayList extends ArrayList<SetItem> {
                 return;
             }
         }
+    }
+
+    public String toPrefString() {
+        StringBuilder selectedSetsText = new StringBuilder();
+
+        for (SetItem set : this) {
+            if(selectedSetsText.length() > 0) {
+                selectedSetsText.append(",");
+            }
+
+            selectedSetsText.append(set.getCode());
+        }
+
+        return selectedSetsText.toString();
     }
 
     @Override
