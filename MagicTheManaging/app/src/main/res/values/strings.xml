@@ -19,4 +19,6 @@
     <string name="drawer_close">Closed</string>
     <string name="action_sign_in">Sign-In</string>
     <string name="action_sign_out">Sign-Out</string>
+    <string name="search">Search</string>
+    <string name="favorites">Favorites</string>
 </resources>
