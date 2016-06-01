@@ -8,31 +8,33 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.essentialtcg.magicthemanaging.R;
-import com.essentialtcg.magicthemanaging.callback.DrawerAdapterCallback;
 import com.essentialtcg.magicthemanaging.callback.LoadCardDetailCallback;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.data.items.SetItem;
 import com.essentialtcg.magicthemanaging.events.UpdateRecyclerViewPositionReturnEvent;
+import com.essentialtcg.magicthemanaging.transforms.RoundImageTransform;
 import com.essentialtcg.magicthemanaging.ui.fragments.CardViewFragment;
 import com.essentialtcg.magicthemanaging.ui.fragments.FavoritesFragment;
 import com.essentialtcg.magicthemanaging.ui.fragments.SearchFragment;
-import com.essentialtcg.magicthemanaging.adapters.DrawerAdapter;
 import com.essentialtcg.magicthemanaging.utils.SetArrayList;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -47,8 +49,7 @@ import com.google.android.gms.common.api.Status;
 import org.greenrobot.eventbus.EventBus;
 
 public class MainActivity extends AppCompatActivity
-        implements DrawerAdapterCallback,
-        GoogleApiClient.OnConnectionFailedListener,
+        implements GoogleApiClient.OnConnectionFailedListener,
         LoadCardDetailCallback {
 
     private String TAG = "MainActivity";
@@ -58,14 +59,13 @@ public class MainActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
 
-    private String MENU_TITLES[] = { "Search", "Decks", "Collection", "Favorites" };
-    private int MENU_ICONS[] = { R.mipmap.ic_search_black_18, R.mipmap.ic_content_copy_black_18,
-            R.mipmap.ic_check_box_black_24, R.mipmap.ic_star_rate_black_18 };
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
-    private RecyclerView mDrawerRecycler;
-    private RecyclerView.Adapter mDrawerAdapter;
-    private RecyclerView.LayoutManager mDrawerLayoutManager;
+    private NavigationView mNavigationView;
+    private View mNavigationHeader;
+    private ImageView mHeaderUserPicture;
+    private TextView mHeaderUserName;
+    private TextView mHeaderUserEmail;
     private Fragment mFragment;
     private Bundle mReenterState;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -74,16 +74,85 @@ public class MainActivity extends AppCompatActivity
 
     private boolean mSigningInOut = false;
 
-    SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+    NavigationView.OnNavigationItemSelectedListener mNavigationItemSelectedListener =
+            new NavigationView.OnNavigationItemSelectedListener() {
 
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals("PREF_LOGGED_IN")) {
-                mDrawerAdapter.notifyDataSetChanged();
-            }
-        }
+                @Override
+                public boolean onNavigationItemSelected(MenuItem item) {
+                    if (item.isChecked()) {
+                        item.setChecked(false);
+                    } else {
+                        item.setChecked(true);
+                    }
 
-    };
+                    mDrawerLayout.closeDrawers();
+
+                    mFragment = null;
+
+                    Fragment leftFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+                    switch (item.getItemId()) {
+                        case R.id.drawer_menu_search:
+                            if (leftFragment.getClass().equals(SearchFragment.class)) {
+                                break;
+                            }
+
+                            mFragment = new SearchFragment();
+
+                            if (getResources().getBoolean(R.bool.multipane)) {
+                                mToolbar.setSubtitle("Search Results");
+
+                                // TODO: Pull this from the sharedpreferences instead
+                                CardSearchParameters cardSearchParameters = new CardSearchParameters();
+
+                                SetArrayList setFilter = new SetArrayList();
+                                SetItem setItem = new SetItem();
+                                setItem.setName("Oath of the Gatewatch");
+                                setItem.setCode("OGW");
+                                setFilter.add(setItem);
+
+                                cardSearchParameters.setSetFilter(setFilter);
+
+                                CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, cardSearchParameters);
+
+                                getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.fragment_container_right, cardViewFragment, "CardViewFragment")
+                                        .commit();
+                            }
+
+                            break;
+                        case R.id.drawer_menu_favorites:
+                            if (leftFragment.getClass().equals(FavoritesFragment.class)) {
+                                break;
+                            }
+
+                            mFragment = new FavoritesFragment();
+
+                            if (getResources().getBoolean(R.bool.multipane)) {
+                                mToolbar.setSubtitle("Favorites");
+
+                                CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, null);
+
+                                getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.fragment_container_right, cardViewFragment, "CardViewFragment")
+                                        .commit();
+                            }
+
+                            break;
+                    }
+
+                    if (mFragment != null) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, mFragment, null)
+                                .commit();
+
+                        return true;
+                    }
+
+                    return false;
+                }
+
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,21 +162,14 @@ public class MainActivity extends AppCompatActivity
         mToolbar = (Toolbar) findViewById(R.id.search_toolbar);
         setSupportActionBar(mToolbar);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        preferences.registerOnSharedPreferenceChangeListener(mPreferenceListener);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerRecycler = (RecyclerView) findViewById(R.id.search_recycler_view);
-        mDrawerRecycler.setHasFixedSize(true);
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mNavigationHeader = mNavigationView.getHeaderView(0);
+        mHeaderUserPicture = (ImageView) mNavigationHeader.findViewById(R.id.header_user_picture);
+        mHeaderUserName = (TextView) mNavigationHeader.findViewById(R.id.header_user_name);
+        mHeaderUserEmail = (TextView) mNavigationHeader.findViewById(R.id.header_user_email);
 
-        mDrawerAdapter = new DrawerAdapter(this, MENU_TITLES, MENU_ICONS, this);
-
-        mDrawerRecycler.setAdapter(mDrawerAdapter);
-
-        mDrawerLayoutManager = new LinearLayoutManager(this);
-
-        mDrawerRecycler.setLayoutManager(mDrawerLayoutManager);
+        mNavigationView.setNavigationItemSelectedListener(mNavigationItemSelectedListener);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
                 R.string.drawer_open, R.string.drawer_close);
@@ -126,6 +188,8 @@ public class MainActivity extends AppCompatActivity
                     .commit();
 
             mToolbar.setSubtitle("Search Results");
+
+            mNavigationView.getMenu().getItem(0).setChecked(true);
 
             if (getResources().getBoolean(R.bool.multipane)) {
                 // TODO: Pull this from the sharedpreferences instead
@@ -285,75 +349,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @Override
-    public void onCallback(int position) {
-        mFragment = null;
-
-        Fragment leftFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-
-        switch (position) {
-            case 0:
-                if (leftFragment.getClass().equals(SearchFragment.class)) {
-                    break;
-                }
-
-                mFragment = new SearchFragment();
-
-                if (getResources().getBoolean(R.bool.multipane)) {
-                    mToolbar.setSubtitle("Search Results");
-
-                    // TODO: Pull this from the sharedpreferences instead
-                    CardSearchParameters cardSearchParameters = new CardSearchParameters();
-
-                    SetArrayList setFilter = new SetArrayList();
-                    SetItem setItem = new SetItem();
-                    setItem.setName("Oath of the Gatewatch");
-                    setItem.setCode("OGW");
-                    setFilter.add(setItem);
-
-                    cardSearchParameters.setSetFilter(setFilter);
-
-                    CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, cardSearchParameters);
-
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container_right, cardViewFragment, "CardViewFragment")
-                            .commit();
-                }
-
-                break;
-            case 3:
-                if (leftFragment.getClass().equals(FavoritesFragment.class)) {
-                    break;
-                }
-
-                mFragment = new FavoritesFragment();
-
-                if (getResources().getBoolean(R.bool.multipane)) {
-                    mToolbar.setSubtitle("Favorites");
-
-                    CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, null);
-
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container_right, cardViewFragment, "CardViewFragment")
-                            .commit();
-                }
-
-                break;
-            default:
-                Log.d(TAG, String.format(
-                        "onCallback: Attempted to load unimplemented Fragment at position (%s)",
-                        String.valueOf(position)));
-        }
-
-        if (mFragment != null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, mFragment, null)
-                    .commit();
-        }
-
-        mDrawerLayout.closeDrawers();
-    }
-
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -393,6 +388,23 @@ public class MainActivity extends AppCompatActivity
                 editor.putString("PREF_PROFILE_IMAGE_URL", "");
             }
 
+            mHeaderUserPicture.setVisibility(View.VISIBLE);
+
+            if (account.getPhotoUrl() != null && !account.getPhotoUrl().toString().equals("")) {
+                Glide.with(this)
+                        .load(account.getPhotoUrl().toString())
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        //.skipMemoryCache(true)
+                        .transform(new RoundImageTransform(this))
+                        .dontAnimate()
+                        .into(mHeaderUserPicture);
+            }
+
+            mHeaderUserName.setText(account.getDisplayName());
+            mHeaderUserEmail.setText(account.getEmail());
+            mHeaderUserName.setVisibility(View.VISIBLE);
+            mHeaderUserEmail.setVisibility(View.VISIBLE);
+
             if (mSigningInOut) {
                 Snackbar.make(findViewById(R.id.main_coord),
                         "Successfully Logged In", Snackbar.LENGTH_SHORT).show();
@@ -406,6 +418,10 @@ public class MainActivity extends AppCompatActivity
             editor.putString("PREF_LOGGED_IN_NAME", "");
             editor.putString("PREF_LOGGED_IN_EMAIL", "");
             editor.putString("PREF_PROFILE_IMAGE_URL", "");
+
+            mHeaderUserPicture.setVisibility(View.INVISIBLE);
+            mHeaderUserName.setVisibility(View.INVISIBLE);
+            mHeaderUserEmail.setVisibility(View.INVISIBLE);
 
             if (mSigningInOut) {
                 Snackbar.make(findViewById(R.id.main_coord),
@@ -423,8 +439,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         editor.commit();
-
-        mDrawerAdapter.notifyDataSetChanged();
     }
 
     private void showProgressDialog() {
