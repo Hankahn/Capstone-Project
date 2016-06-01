@@ -38,7 +38,7 @@
                 android:id="@+id/fragment_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="2" />
+                android:layout_weight="1" />
 
             <FrameLayout
                 android:id="@+id/fragment_container_right"
@@ -50,12 +50,12 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_recycler_view"
-        android:layout_width="320dp"
+    <android.support.design.widget.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
-        android:background="#FFFFFF"
-        android:scrollbars="vertical" />
+        android:layout_gravity="start"
+        app:headerLayout="@layout/header"
+        app:menu="@menu/drawer" />
 
 </android.support.v4.widget.DrawerLayout>
