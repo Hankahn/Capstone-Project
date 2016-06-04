@@ -1,9 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'ManagingTheMagicKey'
+            keyPassword 'password'
+            storeFile file('C:/Users/Shawn/Documents/GitHub/Capstone-Project/MagicTheManaging/release.keystore')
+            storePassword 'password'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
-
     defaultConfig {
         applicationId "com.essentialtcg.magicthemanaging"
         minSdkVersion 16
@@ -15,6 +22,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -35,5 +43,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'org.greenrobot:eventbus:3.0.0'
 }
+
+
 
 apply plugin: 'com.google.gms.google-services'
