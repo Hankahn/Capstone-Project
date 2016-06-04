@@ -17,7 +17,6 @@ import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,20 +96,11 @@ public class SearchFragment extends Fragment
                     String updatedTransitionName =
                             String.format("source_%s", String.valueOf(itemId));
 
-                    Log.d(TAG, "onMapSharedElements: 1 " + updatedTransitionName);
-
                     SearchResultsRecyclerAdapter.SearchResultViewHolder viewHolder =
                             (SearchResultsRecyclerAdapter.SearchResultViewHolder)
                                     mRecyclerView.findViewHolderForItemId(itemId);
 
-                    //View itemView = mRecyclerView.getLayoutManager().findViewByPosition(mCurrentPosition);
-
                     View updatedSharedElement = viewHolder.croppedImageView;
-
-                    /*ImageView croppedImageView = (ImageView) mRecyclerView.findViewWithTag(
-                        updatedTransitionName);
-
-                    View updatedSharedElement = croppedImageView;*/
 
                     if (updatedSharedElement != null) {
                         names.clear();
@@ -134,7 +124,7 @@ public class SearchFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
-        if (((MainActivity)getActivity()).getSupportActionBar() != null) {
+        if (((MainActivity) getActivity()).getSupportActionBar() != null) {
             ((MainActivity) getActivity()).getSupportActionBar().setSubtitle("Search Results");
         }
 
@@ -188,7 +178,7 @@ public class SearchFragment extends Fragment
         mNameFilterEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_DONE) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
                     Util.hideSoftKeyboard(getActivity());
                 }
 
@@ -277,8 +267,6 @@ public class SearchFragment extends Fragment
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        //super.onSaveInstanceState(outState);
-
         int position;
 
         try {
@@ -370,7 +358,7 @@ public class SearchFragment extends Fragment
     }
 
     @Subscribe
-    protected void onUpdateRecyclerViewPositionEvent(UpdateRecyclerViewPositionReturnEvent event) {
+    public void onUpdateRecyclerViewPositionEvent(UpdateRecyclerViewPositionReturnEvent event) {
         mRecyclerView.scrollToPosition(event.currentPosition);
 
         mInitialPosition = event.initialPosition;
@@ -387,30 +375,6 @@ public class SearchFragment extends Fragment
                 mRecyclerView.requestLayout();
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    getActivity().startPostponedEnterTransition();
-                }
-
-                return true;
-            }
-        });
-    }
-
-    private void startPostponedEnterTransition() {
-        if (mRecyclerView.isAttachedToWindow()) {
-            getActivity().startPostponedEnterTransition();
-
-            return;
-        }
-
-        mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-
-                mRecyclerView.requestLayout();
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    //Toast.makeText(getActivity(), "starting postponed transitions", Toast.LENGTH_SHORT).show();
                     getActivity().startPostponedEnterTransition();
                 }
 
