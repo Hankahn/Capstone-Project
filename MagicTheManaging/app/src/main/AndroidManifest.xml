@@ -57,6 +57,18 @@
             android:name=".data.contentProviders.SetProvider"
             android:authorities="com.essentialtcg.magicthemanaging.sets"
             android:exported="false" />
+        
+        <receiver android:name=".ui.widgets.FavoritesWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.essentialtcg.magicthemanaging.ACTION_DATA_UPDATED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/favorites_appwidget_info" />
+        </receiver>
+        
+        <service android:name=".services.FavoritesWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
     </application>
 
