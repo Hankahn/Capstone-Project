@@ -21,4 +21,7 @@
     <string name="action_sign_out">Sign-Out</string>
     <string name="search">Search</string>
     <string name="favorites">Favorites</string>
+    <string name="favorites.widget.title">Favorites</string>
+    <string name="sign.in.progress.text">Loading</string>
+    <string name="google_profile_image">Google Profile Image</string>
 </resources>
