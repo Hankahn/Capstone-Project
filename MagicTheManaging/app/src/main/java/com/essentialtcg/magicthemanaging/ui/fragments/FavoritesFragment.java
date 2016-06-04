@@ -38,6 +38,7 @@ public class FavoritesFragment extends Fragment
 
     private static final int FAVORITE_LOADER_ID = 2;
 
+    private SearchResultsRecyclerAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private TextView mEmptyResultTextView;
 
@@ -56,8 +57,6 @@ public class FavoritesFragment extends Fragment
 
                     String updatedTransitionName =
                             String.format("source_%s", String.valueOf(itemId));
-
-                    Log.d(TAG, "onMapSharedElements: 1 " + updatedTransitionName);
 
                     SearchResultsRecyclerAdapter.SearchResultViewHolder viewHolder =
                             (SearchResultsRecyclerAdapter.SearchResultViewHolder)
@@ -92,6 +91,8 @@ public class FavoritesFragment extends Fragment
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.favorites_recycler_view);
         mEmptyResultTextView = (TextView) rootView.findViewById(R.id.favorites_empty_reset_text_view);
+
+        getActivity().setExitSharedElementCallback(mSharedElementCallback);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(new EmptyRecyclerView());
@@ -130,21 +131,20 @@ public class FavoritesFragment extends Fragment
             mRecyclerView.setVisibility(View.VISIBLE);
         }
 
-        //FavoritesResultsRecyclerAdapter adapter = new FavoritesResultsRecyclerAdapter(cursor);
-        SearchResultsRecyclerAdapter adapter = SearchResultsRecyclerAdapter.newFavoritesInstance(
+        mAdapter = SearchResultsRecyclerAdapter.newFavoritesInstance(
                 cursor, getActivity(), (MainActivity) getActivity());
 
-        adapter.setHasStableIds(true);
+        mAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         layoutManager.scrollToPosition(mPosition);
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        mRecyclerView.setAdapter(null);
     }
 
     private void loadData() {
@@ -158,6 +158,7 @@ public class FavoritesFragment extends Fragment
     @Subscribe
     public void onUpdateRecyclerViewPositionEvent(UpdateRecyclerViewPositionEvent event) {
         mRecyclerView.scrollToPosition(event.currentPosition);
+        mAdapter.setCurrentPosition(event.currentPosition);
     }
 
     @Subscribe
@@ -166,7 +167,7 @@ public class FavoritesFragment extends Fragment
     }
 
     @Subscribe
-    public void onUpdateRecyclerViewPositionReturnEvent(UpdateRecyclerViewPositionReturnEvent event) {
+    public void onUpdateRecyclerViewPositionEvent(UpdateRecyclerViewPositionReturnEvent event) {
         mRecyclerView.scrollToPosition(event.currentPosition);
 
         mInitialPosition = event.initialPosition;
@@ -191,11 +192,4 @@ public class FavoritesFragment extends Fragment
         });
     }
 
-    public void scrollToItem(int position) {
-        mRecyclerView.scrollToPosition(position);
-    }
-
-    public void reloadData() {
-        loadData();
-    }
 }
