@@ -7,4 +7,5 @@
     <dimen name="search_list_item_horizontal_margin">5dp</dimen>
     <dimen name="SET_PICKER_SET_ICON_WIDTH">15dp</dimen>
     <dimen name="SET_PICKER_SET_ICON_HEIGHT">15dp</dimen>
+    <dimen name="widget_margin">8dp</dimen>
 </resources>
