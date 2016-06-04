@@ -39,7 +39,8 @@
                     android:layout_height="43dp"
                     android:layout_marginRight="5dp"
                     android:layout_marginEnd="5dp"
-                    android:src="@mipmap/card_back" />
+                    android:src="@mipmap/card_back"
+                    tools:ignore="ContentDescription" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -109,12 +110,6 @@
                 </LinearLayout>
 
             </LinearLayout>
-
-            <!--<View android:id="@+id/separator"
-                android:background="#000000"
-                android:layout_width = "fill_parent"
-                android:layout_height="1dp"
-                android:layout_centerVertical ="true" />-->
 
         </LinearLayout>
 
