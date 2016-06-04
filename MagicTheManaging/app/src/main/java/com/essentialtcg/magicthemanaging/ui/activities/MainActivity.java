@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity
     private TextView mHeaderUserEmail;
     private Fragment mFragment;
     private Bundle mReenterState;
+    private CoordinatorLayout mCoordinatorLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private MenuItem mSignInMenuItem;
     private MenuItem mSignOutMenuItem;
@@ -162,6 +164,7 @@ public class MainActivity extends AppCompatActivity
         mToolbar = (Toolbar) findViewById(R.id.search_toolbar);
         setSupportActionBar(mToolbar);
 
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coord);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mNavigationHeader = mNavigationView.getHeaderView(0);
@@ -179,9 +182,7 @@ public class MainActivity extends AppCompatActivity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         if (savedInstanceState == null) {
-            SearchFragment searchFragment = new SearchFragment();
-
-            mFragment = searchFragment;
+            mFragment = new SearchFragment();
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mFragment, "SearchFragment")
@@ -325,24 +326,21 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_sign_in) {
-            mSigningInOut = true;
+        switch (id) {
+            case R.id.action_sign_in:
+                mSigningInOut = true;
 
-            signIn();
+                signIn();
 
-            return true;
-        }
+                return true;
+            case R.id.action_sign_out:
+                mSigningInOut = true;
 
-        if (id == R.id.action_sign_out) {
-            mSigningInOut = true;
+                signOut();
 
-            signOut();
-
-            return true;
-        }
-
-        if (id == R.id.action_settings) {
-            return true;
+                return true;
+            case R.id.action_settings:
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -406,7 +404,7 @@ public class MainActivity extends AppCompatActivity
             mHeaderUserEmail.setVisibility(View.VISIBLE);
 
             if (mSigningInOut) {
-                Snackbar.make(findViewById(R.id.main_coord),
+                Snackbar.make(mCoordinatorLayout,
                         "Successfully Logged In", Snackbar.LENGTH_SHORT).show();
                 mSigningInOut = false;
             }
@@ -424,7 +422,7 @@ public class MainActivity extends AppCompatActivity
             mHeaderUserEmail.setVisibility(View.INVISIBLE);
 
             if (mSigningInOut) {
-                Snackbar.make(findViewById(R.id.main_coord),
+                Snackbar.make(mCoordinatorLayout,
                         "Successfully Logged Out", Snackbar.LENGTH_SHORT).show();
                 mSigningInOut = false;
             }
@@ -438,13 +436,13 @@ public class MainActivity extends AppCompatActivity
             mSignInMenuItem.setVisible(!loggedIn);
         }
 
-        editor.commit();
+        editor.apply();
     }
 
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading");
+            mProgressDialog.setMessage(getString(R.string.sign_in_progress_text));
             mProgressDialog.setIndeterminate(true);
         }
 
