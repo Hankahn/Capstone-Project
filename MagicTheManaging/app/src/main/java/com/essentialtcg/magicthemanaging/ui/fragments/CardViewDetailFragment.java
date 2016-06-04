@@ -1,6 +1,9 @@
 package com.essentialtcg.magicthemanaging.ui.fragments;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -40,6 +43,7 @@ import com.essentialtcg.magicthemanaging.data.items.PriceItem;
 import com.essentialtcg.magicthemanaging.data.loaders.FavoriteLoader;
 import com.essentialtcg.magicthemanaging.events.UpdateFavoritesEvent;
 import com.essentialtcg.magicthemanaging.tasks.GetPriceAsyncTask;
+import com.essentialtcg.magicthemanaging.ui.widgets.FavoritesWidget;
 import com.essentialtcg.magicthemanaging.utils.Util;
 import com.essentialtcg.magicthemanaging.data.items.CardItem;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
@@ -135,6 +139,18 @@ public class CardViewDetailFragment extends Fragment
 
                     Snackbar.make(mCoordinatorLayout, "Removed from favorites", Snackbar.LENGTH_SHORT).show();
                 }
+
+                Intent favoritesUpdatedIntent = new Intent(getActivity(), FavoritesWidget.class);
+
+                favoritesUpdatedIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+
+                int[] ids = AppWidgetManager.getInstance(
+                        getActivity().getApplication()).getAppWidgetIds(
+                        new ComponentName(getActivity().getApplication(), FavoritesWidget.class));
+
+                favoritesUpdatedIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+
+                getActivity().sendBroadcast(favoritesUpdatedIntent);
 
                 EventBus.getDefault().post(new UpdateFavoritesEvent());
             } else {
