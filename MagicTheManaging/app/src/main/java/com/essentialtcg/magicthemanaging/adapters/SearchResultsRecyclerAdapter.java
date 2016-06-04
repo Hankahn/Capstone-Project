@@ -92,7 +92,6 @@ public class SearchResultsRecyclerAdapter extends
         mCursorPosition = position;
         mCursor.moveToPosition(position);
 
-
         if (mContext.getResources().getBoolean(R.bool.multipane)) {
             if (position == mSelectedPosition) {
                 holder.cardView.setCardBackgroundColor(mContext.getResources().getColor(R.color.gray));
