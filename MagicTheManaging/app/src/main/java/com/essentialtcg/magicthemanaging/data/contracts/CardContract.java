@@ -118,7 +118,7 @@ public class CardContract {
                 }
             }
 
-            Uri uri = BASE_URI.buildUpon()
+            return BASE_URI.buildUpon()
                     .appendPath("cards")
                     .appendPath("search")
                     .appendPath("name")
@@ -127,8 +127,6 @@ public class CardContract {
                     .appendPath("sets")
                     .appendPath(setFilterCodeText.length() > 0 ?
                             setFilterCodeText.toString() : "*").build();
-
-            return uri;
         }
 
         /**
