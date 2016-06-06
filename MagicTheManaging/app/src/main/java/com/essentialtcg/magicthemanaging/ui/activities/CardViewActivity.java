@@ -3,7 +3,7 @@ package com.essentialtcg.magicthemanaging.ui.activities;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -38,11 +38,7 @@ public class CardViewActivity extends AppCompatActivity
 
             Window window = getWindow();
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark, null));
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-            }
+            window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
         mStartPosition = 0;
@@ -76,11 +72,6 @@ public class CardViewActivity extends AppCompatActivity
                         .commit();
             }
         }
-    }
-
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
     }
 
     @Override
