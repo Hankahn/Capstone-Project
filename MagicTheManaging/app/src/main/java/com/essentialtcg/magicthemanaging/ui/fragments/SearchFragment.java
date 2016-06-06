@@ -3,6 +3,7 @@ package com.essentialtcg.magicthemanaging.ui.fragments;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -74,16 +75,13 @@ public class SearchFragment extends Fragment
     private BottomSheetBehavior mBottomSheetBehavior;
     private FloatingActionButton mFab;
     private CoordinatorLayout.LayoutParams mFabLayoutParams;
-    private FloatingActionButton mSearchButton;
-    private SearchFragment mFragment;
+    private final SearchFragment mFragment;
     private boolean mReturning = false;
 
     private CardSearchParameters mSearchParameters = new CardSearchParameters();
     private int mPosition = 0;
-    private int mCursorPosition;
     private int mInitialPosition;
     private int mCurrentPosition;
-    private boolean mIsAnimatingOut = false;
 
     private final SharedElementCallback mSharedElementCallback = new SharedElementCallback() {
         @Override
@@ -136,7 +134,7 @@ public class SearchFragment extends Fragment
         mSetFilterEditText = (EditText) rootView.findViewById(R.id.set_filter_edit_text);
         mFab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         mFabLayoutParams = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
-        mSearchButton = (FloatingActionButton) rootView.findViewById(R.id.search_button);
+        FloatingActionButton searchButton = (FloatingActionButton) rootView.findViewById(R.id.search_button);
 
         mBottomSheetBehavior.setBottomSheetCallback(mBottomSheetBehaviorCallback);
 
@@ -163,7 +161,7 @@ public class SearchFragment extends Fragment
                 mSearchParameters.getSetFilter().size() > 0) {
             mSetFilterEditText.setText(mSearchParameters.getSetFilter().toString());
         } else {
-            mSetFilterEditText.setText("All");
+            mSetFilterEditText.setText(R.string.all_sets_name);
         }
 
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -196,7 +194,7 @@ public class SearchFragment extends Fragment
             }
         });
 
-        mSearchButton.setOnClickListener(new View.OnClickListener() {
+        searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mSearchParameters.setNameFilter(mNameFilterEditText.getText().toString());
@@ -329,11 +327,11 @@ public class SearchFragment extends Fragment
         }
     }
 
-    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback =
+    private final BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback =
             new BottomSheetBehavior.BottomSheetCallback() {
 
                 @Override
-                public void onStateChanged(View bottomSheet, int newState) {
+                public void onStateChanged(@NonNull View bottomSheet, int newState) {
                     if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                         fabAnimateIn(mFab);
                         mFabLayoutParams.setBehavior(new ScrollFabBehavior(getActivity(), null));
@@ -346,7 +344,7 @@ public class SearchFragment extends Fragment
                 }
 
                 @Override
-                public void onSlide(View bottomSheet, float slideOffset) {
+                public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 
                 }
             };
@@ -389,15 +387,14 @@ public class SearchFragment extends Fragment
             ViewCompat.animate(button).scaleX(0.0F).scaleY(0.0F).alpha(0.0F).setInterpolator(INTERPOLATOR).withLayer()
                     .setListener(new ViewPropertyAnimatorListener() {
                         public void onAnimationStart(View view) {
-                            mIsAnimatingOut = true;
+
                         }
 
                         public void onAnimationCancel(View view) {
-                            mIsAnimatingOut = false;
+
                         }
 
                         public void onAnimationEnd(View view) {
-                            mIsAnimatingOut = false;
                             view.setVisibility(View.GONE);
                         }
                     }).start();
@@ -407,11 +404,10 @@ public class SearchFragment extends Fragment
             anim.setDuration(200L);
             anim.setAnimationListener(new Animation.AnimationListener() {
                 public void onAnimationStart(Animation animation) {
-                    mIsAnimatingOut = true;
+
                 }
 
                 public void onAnimationEnd(Animation animation) {
-                    mIsAnimatingOut = false;
                     button.setVisibility(View.GONE);
                 }
 

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -154,7 +155,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
         final int GROUP_HOLDER = 0;
         final int ITEM_HOLDER = 1;
 
-        private ArrayList<SetItem> mSetList;
+        private final ArrayList<SetItem> mSetList;
 
         public RecyclerAdapter(ArrayList<SetItem> setList) {
             mSetList = setList;
@@ -238,14 +239,9 @@ public class SetPickerDialogFragment extends DialogFragment implements
             try {
                 int resourceId = CardUtil.parseSetRarity(setItem.getCode(), "Common");
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    viewHolder.setIconImageView.setImageDrawable(
-                            getResources().getDrawable(resourceId, null));
-                } else {
-                    viewHolder.setIconImageView.setContentDescription(setItem.getCode());
-                    viewHolder.setIconImageView.setImageDrawable(
-                            getResources().getDrawable(resourceId));
-                }
+                viewHolder.setIconImageView.setContentDescription(setItem.getCode());
+                viewHolder.setIconImageView.setImageDrawable(
+                        ContextCompat.getDrawable(getActivity(), resourceId));
 
                 viewHolder.setIconImageView.setVisibility(View.VISIBLE);
             } catch (Exception ex) {
@@ -284,7 +280,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
 
     public static class GroupViewHolder extends ViewHolder {
 
-        public TextView groupTextView;
+        public final TextView groupTextView;
 
         public GroupViewHolder(View view) {
             super(view);
@@ -296,7 +292,8 @@ public class SetPickerDialogFragment extends DialogFragment implements
         }
     }
 
-    View.OnClickListener onViewSelect = new View.OnClickListener() {
+    private final View.OnClickListener onViewSelect = new View.OnClickListener() {
+
         @Override
         public void onClick(View view) {
             CheckBox checkBox = (CheckBox) view.findViewById(R.id.set_picker_check_box);
@@ -313,9 +310,11 @@ public class SetPickerDialogFragment extends DialogFragment implements
 
             mSearchParameters.setSetFilter(mSelectedSets);
         }
+
     };
 
-    View.OnClickListener onCheckBoxSelect = new View.OnClickListener() {
+    final View.OnClickListener onCheckBoxSelect = new View.OnClickListener() {
+
         @Override
         public void onClick(View view) {
             CheckBox checkBox = (CheckBox) view;
@@ -329,6 +328,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
 
             mSearchParameters.setSetFilter(mSelectedSets);
         }
+
     };
 
     public interface SetPickerDialogFragmentListener {

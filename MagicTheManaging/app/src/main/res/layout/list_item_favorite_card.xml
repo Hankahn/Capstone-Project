@@ -102,7 +102,7 @@
                         android:id="@+id/featured_stat_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|right"
+                        android:layout_gravity="bottom|end"
                         tools:cardText="3/3" />
 
                 </LinearLayout>

@@ -163,9 +163,9 @@ public class SetItem implements Parcelable {
         dest.writeString(border);
         dest.writeString(setType);
         dest.writeString(block);
-        dest.writeByte((byte) (onlineOnly == true ? 1 : 0));
+        dest.writeByte((byte) (onlineOnly ? 1 : 0));
         dest.writeString(booster);
-        dest.writeByte((byte) (firstSet == true ? 1 : 0));
+        dest.writeByte((byte) (firstSet ? 1 : 0));
     }
 
     public static final Parcelable.Creator<SetItem> CREATOR

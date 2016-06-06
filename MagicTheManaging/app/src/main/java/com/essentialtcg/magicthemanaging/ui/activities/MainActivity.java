@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener,
         LoadCardDetailCallback {
 
-    private String TAG = "MainActivity";
+    private final String TAG = "MainActivity";
 
     private static final int RC_SIGN_IN = 9001;
 
@@ -62,13 +62,10 @@ public class MainActivity extends AppCompatActivity
 
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
-    private NavigationView mNavigationView;
-    private View mNavigationHeader;
     private ImageView mHeaderUserPicture;
     private TextView mHeaderUserName;
     private TextView mHeaderUserEmail;
     private Fragment mFragment;
-    private Bundle mReenterState;
     private CoordinatorLayout mCoordinatorLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private MenuItem mSignInMenuItem;
@@ -76,7 +73,7 @@ public class MainActivity extends AppCompatActivity
 
     private boolean mSigningInOut = false;
 
-    NavigationView.OnNavigationItemSelectedListener mNavigationItemSelectedListener =
+    final NavigationView.OnNavigationItemSelectedListener mNavigationItemSelectedListener =
             new NavigationView.OnNavigationItemSelectedListener() {
 
                 @Override
@@ -166,13 +163,13 @@ public class MainActivity extends AppCompatActivity
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coord);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
-        mNavigationHeader = mNavigationView.getHeaderView(0);
-        mHeaderUserPicture = (ImageView) mNavigationHeader.findViewById(R.id.header_user_picture);
-        mHeaderUserName = (TextView) mNavigationHeader.findViewById(R.id.header_user_name);
-        mHeaderUserEmail = (TextView) mNavigationHeader.findViewById(R.id.header_user_email);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        View navigationHeader = navigationView.getHeaderView(0);
+        mHeaderUserPicture = (ImageView) navigationHeader.findViewById(R.id.header_user_picture);
+        mHeaderUserName = (TextView) navigationHeader.findViewById(R.id.header_user_name);
+        mHeaderUserEmail = (TextView) navigationHeader.findViewById(R.id.header_user_email);
 
-        mNavigationView.setNavigationItemSelectedListener(mNavigationItemSelectedListener);
+        navigationView.setNavigationItemSelectedListener(mNavigationItemSelectedListener);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
                 R.string.drawer_open, R.string.drawer_close);
@@ -190,7 +187,7 @@ public class MainActivity extends AppCompatActivity
 
             mToolbar.setSubtitle("Search Results");
 
-            mNavigationView.getMenu().getItem(0).setChecked(true);
+            navigationView.getMenu().getItem(0).setChecked(true);
 
             if (getResources().getBoolean(R.bool.multipane)) {
                 // TODO: Pull this from the sharedpreferences instead
@@ -254,17 +251,12 @@ public class MainActivity extends AppCompatActivity
             showProgressDialog();
             optionalPendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
+                public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
                     hideProgressDialog();
                     handleSignInResult(googleSignInResult);
                 }
             });
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     @Override
@@ -295,10 +287,10 @@ public class MainActivity extends AppCompatActivity
             postponeEnterTransition();
         }
 
-        mReenterState = new Bundle(data.getExtras());
+        Bundle reenterState = new Bundle(data.getExtras());
 
-        int initialPosition = mReenterState.getInt(CardViewActivity.INITIAL_CARD_POSITION);
-        int currentPosition = mReenterState.getInt(CardViewActivity.CURRENT_CARD_POSITION);
+        int initialPosition = reenterState.getInt(CardViewActivity.INITIAL_CARD_POSITION);
+        int currentPosition = reenterState.getInt(CardViewActivity.CURRENT_CARD_POSITION);
 
         EventBus.getDefault().post(
                 new UpdateRecyclerViewPositionReturnEvent(initialPosition, currentPosition));
@@ -356,7 +348,7 @@ public class MainActivity extends AppCompatActivity
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
-                    public void onResult(Status status) {
+                    public void onResult(@NonNull Status status) {
                         checkLoginStatus();
                     }
                 });

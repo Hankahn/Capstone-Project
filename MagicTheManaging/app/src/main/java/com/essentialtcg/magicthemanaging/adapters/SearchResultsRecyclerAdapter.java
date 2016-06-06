@@ -23,7 +23,6 @@ import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.callback.LoadCardDetailCallback;
 import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
 import com.essentialtcg.magicthemanaging.data.loaders.CardLoader;
-import com.essentialtcg.magicthemanaging.events.UpdateRecyclerViewPositionEvent;
 import com.essentialtcg.magicthemanaging.events.UpdateViewPagerPositionEvent;
 import com.essentialtcg.magicthemanaging.utils.CardUtil;
 import com.essentialtcg.magicthemanaging.utils.Util;
@@ -40,18 +39,15 @@ public class SearchResultsRecyclerAdapter extends
 
     private static final String TAG = "SearchResultsAdapter";
 
-    private int mCursorPosition;
-    private Cursor mCursor;
+    private final Cursor mCursor;
     private int mSelectedPosition;
-    private Context mContext;
+    private final Context mContext;
     private CardSearchParameters mSearchParameters;
-    private LoadCardDetailCallback mCardDetailCallback;
-    private boolean mShowFavorites;
+    private final LoadCardDetailCallback mCardDetailCallback;
 
-    private SearchResultsRecyclerAdapter(Cursor cursor, boolean showFavorites, Context context,
+    private SearchResultsRecyclerAdapter(Cursor cursor, Context context,
                                          LoadCardDetailCallback cardDetailCallback) {
         mCursor = cursor;
-        mShowFavorites = showFavorites;
         mContext = context;
         mCardDetailCallback = cardDetailCallback;
     }
@@ -66,10 +62,9 @@ public class SearchResultsRecyclerAdapter extends
 
     public static SearchResultsRecyclerAdapter newFavoritesInstance(Cursor cursor, Context context,
                     LoadCardDetailCallback cardDetailCallback) {
-        SearchResultsRecyclerAdapter newInstance = new SearchResultsRecyclerAdapter(cursor, true,
-                context, cardDetailCallback);
 
-        return newInstance;
+        return new SearchResultsRecyclerAdapter(cursor, context,
+                cardDetailCallback);
     }
 
     @Override
@@ -82,21 +77,19 @@ public class SearchResultsRecyclerAdapter extends
     public SearchResultViewHolder onCreateViewHolder(final ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(
                 R.layout.list_item_search_card, viewGroup, false);
-        final SearchResultViewHolder viewHolder = new SearchResultViewHolder(view);
 
-        return viewHolder;
+        return new SearchResultViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final SearchResultViewHolder holder, int position) {
-        mCursorPosition = position;
         mCursor.moveToPosition(position);
 
         if (mContext.getResources().getBoolean(R.bool.multipane)) {
             if (position == mSelectedPosition) {
-                holder.cardView.setCardBackgroundColor(mContext.getResources().getColor(R.color.gray));
+                holder.cardView.setCardBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
             } else {
-                holder.cardView.setCardBackgroundColor(mContext.getResources().getColor(R.color.white));
+                holder.cardView.setCardBackgroundColor(ContextCompat.getColor(mContext, R.color.white));
             }
         }
 
@@ -266,14 +259,14 @@ public class SearchResultsRecyclerAdapter extends
     public class SearchResultViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
-        public CardView cardView;
-        public ImageView croppedImageView;
-        public TextView nameTextView;
-        public TextView setRarityTextView;
-        public TextView typeTextView;
-        public LinearLayout rightContainer;
-        public TextView manaCostTextView;
-        public TextView featuredStatTextView;
+        public final CardView cardView;
+        public final ImageView croppedImageView;
+        public final TextView nameTextView;
+        public final TextView setRarityTextView;
+        public final TextView typeTextView;
+        public final LinearLayout rightContainer;
+        public final TextView manaCostTextView;
+        public final TextView featuredStatTextView;
 
         public SearchResultViewHolder(View view) {
             super(view);
