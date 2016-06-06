@@ -1,6 +1,5 @@
 package com.essentialtcg.magicthemanaging.data.loaders;
 
-import android.content.ContentProvider;
 import android.content.Context;
 import android.support.v4.content.CursorLoader;
 import android.net.Uri;
