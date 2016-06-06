@@ -1,6 +1,7 @@
 package com.essentialtcg.magicthemanaging.ui.fragments;
 
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -68,19 +69,18 @@ public class CardViewFragment extends Fragment
                 return;
             }
 
-            ImageView sharedElement = mCardViewDetailFragment.getCardImageView();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ImageView sharedElement = mCardViewDetailFragment.getCardImageView();
 
-            if (sharedElement == null) {
-                names.clear();
-                sharedElements.clear();
-            } else if (mCurrentPosition != mStartPosition) {
-                /*sharedElement.setTransitionName(String.format("source_%s",
-                        mSelectedItemId));*/
-                Log.d(TAG, "onMapSharedElements: 2 " + sharedElement.getTransitionName());
-                names.clear();
-                names.add(sharedElement.getTransitionName());
-                sharedElements.clear();
-                sharedElements.put(sharedElement.getTransitionName(), sharedElement);
+                if (sharedElement == null) {
+                    names.clear();
+                    sharedElements.clear();
+                } else if (mCurrentPosition != mStartPosition) {
+                    names.clear();
+                    names.add(sharedElement.getTransitionName());
+                    sharedElements.clear();
+                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
+                }
             }
         }
     };
@@ -267,7 +267,7 @@ public class CardViewFragment extends Fragment
         try {
             mPagerAdapter.notifyDataSetChanged();
         } catch (Exception ex) {
-
+            Log.e(TAG, "PagerAdapter null");
         }
     }
 
@@ -290,10 +290,7 @@ public class CardViewFragment extends Fragment
 
             CardItem cardItem = CardTransform.transformInstance(mCursor);
 
-            CardViewDetailFragment cardViewDetailFragment =
-                    CardViewDetailFragment.newInstance(cardItem, mSelectedItemId);
-
-            return cardViewDetailFragment;
+            return CardViewDetailFragment.newInstance(cardItem, mSelectedItemId);
         }
 
         @Override
