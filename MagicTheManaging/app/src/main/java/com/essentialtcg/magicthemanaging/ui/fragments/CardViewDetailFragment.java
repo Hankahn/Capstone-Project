@@ -18,6 +18,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -97,7 +98,7 @@ public class CardViewDetailFragment extends Fragment
 
             };
 
-    View.OnClickListener mFavoriteClickListener = new View.OnClickListener() {
+    final View.OnClickListener mFavoriteClickListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View view) {
@@ -115,11 +116,8 @@ public class CardViewDetailFragment extends Fragment
                     getActivity().getContentResolver().insert(FavoriteContract.Favorites.buildDirUri(),
                             values);
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full, null));
-                    } else {
-                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full));
-                    }
+                    mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
+                            getActivity(), R.drawable.heart_full));
 
                     Snackbar.make(mCoordinatorLayout, "Added to favorites", Snackbar.LENGTH_SHORT).show();
                 } else {
@@ -131,14 +129,13 @@ public class CardViewDetailFragment extends Fragment
                             FavoriteContract.Favorites._ID + " = ?",
                             new String[] { String.valueOf(favoriteId) });
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty, null));
-                    } else {
-                        mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty));
-                    }
+                    mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
+                            getActivity(), R.drawable.heart_empty));
 
                     Snackbar.make(mCoordinatorLayout, "Removed from favorites", Snackbar.LENGTH_SHORT).show();
                 }
+
+                cursor.close();
 
                 Intent favoritesUpdatedIntent = new Intent(getActivity(), FavoritesWidget.class);
 
@@ -161,7 +158,7 @@ public class CardViewDetailFragment extends Fragment
 
     };
 
-    RequestListener<String, GlideDrawable> mCardImageRequestListener = new RequestListener<String, GlideDrawable>() {
+    final RequestListener<String, GlideDrawable> mCardImageRequestListener = new RequestListener<String, GlideDrawable>() {
         @Override
         public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
             startPostponedEnterTransition();
@@ -182,7 +179,7 @@ public class CardViewDetailFragment extends Fragment
 
     };
 
-    ViewTreeObserver.OnPreDrawListener mCardImagePreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+    final ViewTreeObserver.OnPreDrawListener mCardImagePreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
 
         @Override
         public boolean onPreDraw() {
@@ -328,17 +325,11 @@ public class CardViewDetailFragment extends Fragment
             mFavoriteButton.setOnClickListener(mFavoriteClickListener);
 
             if (mCardItem.isFavorite()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full, null));
-                } else {
-                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_full));
-                }
+                mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
+                        getActivity(), R.drawable.heart_full));
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty, null));
-                } else {
-                    mFavoriteButton.setImageDrawable(getResources().getDrawable(R.drawable.heart_empty));
-                }
+                mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
+                        getActivity(), R.drawable.heart_empty));
             }
 
             Glide.with(getActivity())
@@ -464,8 +455,8 @@ public class CardViewDetailFragment extends Fragment
     private class CardDetailPagerAdapter extends FragmentStatePagerAdapter {
 
         private final int NUM_TABS = 2;
-        private RulesFragment mRulesFragment;
-        private PrintingsFragment mPrintingsFragment;
+        private final RulesFragment mRulesFragment;
+        private final PrintingsFragment mPrintingsFragment;
 
         public CardDetailPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
