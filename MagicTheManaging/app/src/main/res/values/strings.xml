@@ -24,4 +24,11 @@
     <string name="favorites.widget.title">Favorites</string>
     <string name="sign.in.progress.text">Loading</string>
     <string name="google_profile_image">Google Profile Image</string>
+    <string name="rules.tab.heading">Rules</string>
+    <string name="printings.tab.heading">Printings</string>
+    <string name="no.favorites.message">No Favorites Assigned</string>
+    <string name="no.search.results.message">No Results</string>
+    <string name="search.option.name">Name</string>
+    <string name="search.options.sets">Sets</string>
+    <string name="all.sets.name">All</string>
 </resources>
