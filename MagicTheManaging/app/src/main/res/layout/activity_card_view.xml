@@ -4,11 +4,3 @@
     android:id="@+id/card_view_fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
-<!-- <fragment
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/card_view_fragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:name="com.essentialtcg.magicthemanaging.ui.fragments.CardViewFragment"
-    tools:layout="@layout/fragment_card_view" />-->
