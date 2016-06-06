@@ -7,7 +7,7 @@ import com.essentialtcg.magicthemanaging.data.CardSearchParameters;
  */
 public class UpdateSearchCardViewEvent {
 
-    public CardSearchParameters searchParameters;
+    public final CardSearchParameters searchParameters;
 
     public UpdateSearchCardViewEvent(CardSearchParameters searchParameters) {
         this.searchParameters = searchParameters;

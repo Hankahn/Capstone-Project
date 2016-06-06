@@ -5,7 +5,7 @@ package com.essentialtcg.magicthemanaging.events;
  */
 public class UpdateFavoritesEvent {
 
-    public void UpdateFavoritesEvent() {
+    public UpdateFavoritesEvent() {
 
     }
 
