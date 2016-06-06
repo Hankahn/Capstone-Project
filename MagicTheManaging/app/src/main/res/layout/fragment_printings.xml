@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="500dp"
-            android:text="Printings" />
+            android:text="@string/printings.tab.heading" />
 
     </android.support.v4.widget.NestedScrollView>
 

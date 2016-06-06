@@ -9,7 +9,6 @@ import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +41,6 @@ public class FavoritesFragment extends Fragment
     private RecyclerView mRecyclerView;
     private TextView mEmptyResultTextView;
 
-    private int mPosition = 0;
     private int mInitialPosition;
     private int mCurrentPosition;
     private boolean mReturning = false;
@@ -137,7 +135,7 @@ public class FavoritesFragment extends Fragment
         mAdapter.setHasStableIds(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        layoutManager.scrollToPosition(mPosition);
+        layoutManager.scrollToPosition(0);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mAdapter);
     }

@@ -18,9 +18,9 @@ import java.net.URL;
  */
 public class GetPriceAsyncTask extends AsyncTask<String, Void, String> {
 
-    private String TAG = "GetPriceAsyncTask";
+    private final String TAG = "GetPriceAsyncTask";
 
-    private GetPriceCallback mGetPriceCallback;
+    private final GetPriceCallback mGetPriceCallback;
 
     public GetPriceAsyncTask(GetPriceCallback callback) {
         mGetPriceCallback = callback;
@@ -63,8 +63,7 @@ public class GetPriceAsyncTask extends AsyncTask<String, Void, String> {
             is = conn.getInputStream();
 
             // Convert the InputStream into a string
-            String contentAsString = readIt(is, len);
-            return contentAsString;
+            return readIt(is, len);
 
             // Makes sure that the InputStream is closed after the app is
             // finished using it.
@@ -75,8 +74,8 @@ public class GetPriceAsyncTask extends AsyncTask<String, Void, String> {
         }
     }
 
-    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
+    private String readIt(InputStream stream, int len) throws IOException {
+        Reader reader;
         reader = new InputStreamReader(stream, "UTF-8");
         char[] buffer = new char[len];
         reader.read(buffer);

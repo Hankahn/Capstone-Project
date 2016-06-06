@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="500dp"
-        android:text="Rules" />
+        android:text="@string/rules.tab.heading" />
 
     </android.support.v4.widget.NestedScrollView>
 

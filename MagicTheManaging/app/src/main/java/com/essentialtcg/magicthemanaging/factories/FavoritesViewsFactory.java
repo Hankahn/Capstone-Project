@@ -32,7 +32,6 @@ public class FavoritesViewsFactory implements RemoteViewsService.RemoteViewsFact
     private Cursor mCursor = null;
     private Context mContext = null;
     private CardLoader mCardLoader = null;
-    private int mAppWidgetId;
 
     private final String[] FAVORITE_COLUMNS = {
             CardContract.Cards._ID,
@@ -52,12 +51,6 @@ public class FavoritesViewsFactory implements RemoteViewsService.RemoteViewsFact
 
     public FavoritesViewsFactory(Context context, Intent intent) {
         mContext = context;
-        mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
-
-        /*mCardLoader = CardLoader.newCardsByFavorites(mContext);
-        mCardLoader.registerListener(5, this);
-        mCardLoader.startLoading();*/
     }
 
     @Override
@@ -104,7 +97,8 @@ public class FavoritesViewsFactory implements RemoteViewsService.RemoteViewsFact
         RemoteViews views =
                 new RemoteViews(mContext.getPackageName(), R.layout.favorites_widget_row);
 
-        views.setTextColor(R.id.favorites_widget_name_text_view, mContext.getResources().getColor(R.color.black));
+        views.setTextColor(R.id.favorites_widget_name_text_view,
+                ContextCompat.getColor(mContext, R.color.black));
 
         if (mCursor.getString(NAME2) != null) {
             views.setTextViewText(R.id.favorites_widget_name_text_view,
