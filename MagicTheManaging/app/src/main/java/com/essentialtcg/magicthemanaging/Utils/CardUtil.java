@@ -7,12 +7,9 @@ import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.data.items.PriceItem;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.concurrent.Exchanger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
