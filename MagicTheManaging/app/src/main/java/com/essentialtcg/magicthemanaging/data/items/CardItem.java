@@ -312,7 +312,7 @@ public class CardItem implements Parcelable {
         dest.writeString(rarity);
         dest.writeString(cardNumber);
         dest.writeString(imageName);
-        dest.writeByte((byte) (hasSecondCard == true ? 1 : 0));
+        dest.writeByte((byte) (hasSecondCard ? 1 : 0));
         dest.writeString(secondName);
         dest.writeString(secondManaCost);
         dest.writeString(secondCardText);
