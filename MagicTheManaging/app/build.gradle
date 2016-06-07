@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'ManagingTheMagicKey'
             keyPassword 'password'
-            storeFile file('C:/Users/Shawn/Documents/GitHub/Capstone-Project/MagicTheManaging/release.keystore')
+            storeFile file('../release.keystore')
             storePassword 'password'
         }
     }
