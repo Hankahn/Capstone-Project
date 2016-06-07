@@ -54,4 +54,6 @@
     <string name="card.price.url.format" formatted="false"><![CDATA[http://partner.tcgplayer.com/x3/phl.asmx/p?pk=%s&s=%s&p=%s]]></string>
     <string name="card.price.url.code">TCGTEST</string>
     <string name="encode.utf8">utf-8</string>
+    <string name="add.to.favorites">Add to favorites</string>
+    <string name="remove.from.favorites">Remove from favorites</string>
 </resources>

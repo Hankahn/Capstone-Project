@@ -116,6 +116,8 @@ public class CardViewDetailFragment extends Fragment
                     getActivity().getContentResolver().insert(FavoriteContract.Favorites.buildDirUri(),
                             values);
 
+                    mFavoriteButton.setContentDescription(getActivity().getString(R.string.remove_from_favorites));
+
                     mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
                             getActivity(), R.drawable.heart_full));
 
@@ -128,6 +130,8 @@ public class CardViewDetailFragment extends Fragment
                     getActivity().getContentResolver().delete(FavoriteContract.Favorites.buildDirUri(),
                             FavoriteContract.Favorites._ID + " = ?",
                             new String[] { String.valueOf(favoriteId) });
+
+                    mFavoriteButton.setContentDescription(getActivity().getString(R.string.add_to_favorites));
 
                     mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
                             getActivity(), R.drawable.heart_empty));
@@ -249,23 +253,6 @@ public class CardViewDetailFragment extends Fragment
         return (mGetPriceTask != null) && (mGetPriceTask.getStatus() == AsyncTask.Status.RUNNING);
     }
 
-    /*@Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(ARG_CARD_TO_SHOW)) {
-                mCardItem = savedInstanceState.getParcelable(ARG_CARD_TO_SHOW);
-            }
-
-            if (savedInstanceState.containsKey(ARG_SELECTED_ITEM_ID)) {
-                mSelectedItemId = savedInstanceState.getLong(ARG_SELECTED_ITEM_ID);
-            }
-        }
-
-        bindViews();
-    }*/
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -332,9 +319,13 @@ public class CardViewDetailFragment extends Fragment
             mFavoriteButton.setOnClickListener(mFavoriteClickListener);
 
             if (mCardItem.isFavorite()) {
+                mFavoriteButton.setContentDescription(getActivity().getString(R.string.remove_from_favorites));
+
                 mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
                         getActivity(), R.drawable.heart_full));
             } else {
+                mFavoriteButton.setContentDescription(getActivity().getString(R.string.add_to_favorites));
+
                 mFavoriteButton.setImageDrawable(ContextCompat.getDrawable(
                         getActivity(), R.drawable.heart_empty));
             }

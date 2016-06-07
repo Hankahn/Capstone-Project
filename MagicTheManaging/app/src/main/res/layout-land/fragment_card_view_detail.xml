@@ -11,16 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!--<android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/card_detail_collapsing_toolbar_layout"
-            android:layout_width="match_parent"
-            android:layout_height="500dp"
-            android:background="#000000"
-            app:titleEnabled="false"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-        </android.support.design.widget.CollapsingToolbarLayout>-->
-
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
@@ -159,6 +149,7 @@
         android:id="@+id/card_view_detail_favorite_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/add.to.favorites"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/heart_empty"
         android:layout_gravity="bottom|end" />
