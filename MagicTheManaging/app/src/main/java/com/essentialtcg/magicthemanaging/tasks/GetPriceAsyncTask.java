@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -18,7 +17,7 @@ import java.net.URL;
  */
 public class GetPriceAsyncTask extends AsyncTask<String, Void, String> {
 
-    private final String TAG = "GetPriceAsyncTask";
+    private static final String TAG = GetPriceAsyncTask.class.getSimpleName();
 
     private final GetPriceCallback mGetPriceCallback;
 
@@ -29,10 +28,10 @@ public class GetPriceAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... urls) {
 
-        // params comes from the execute() call: params[0] is the url.
         try {
             return downloadUrl(urls[0]);
         } catch (IOException e) {
+            Log.d(TAG, String.format("Unable to retrieve price URL: %s", urls[0]));
             return "Unable to retrieve web page. URL may be invalid.";
         }
     }
