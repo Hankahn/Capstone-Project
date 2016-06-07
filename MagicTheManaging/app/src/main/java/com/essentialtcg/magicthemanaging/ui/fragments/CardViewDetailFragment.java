@@ -62,7 +62,7 @@ import java.util.ArrayList;
 public class CardViewDetailFragment extends Fragment
         implements GetPriceCallback {
 
-    private static final String TAG = "CardViewDetailFragment";
+    private static final String TAG = CardViewDetailFragment.class.getSimpleName();
 
     public static final String ARG_CARD_TO_SHOW = "CARD_TO_SHOW";
     public static final String ARG_SELECTED_ITEM_ID = "START_ID";
@@ -223,10 +223,12 @@ public class CardViewDetailFragment extends Fragment
 
         String url = null;
         try {
-            url = String.format("http://partner.tcgplayer.com/x3/phl.asmx/p?pk=%s&s=%s&p=%s",
-                    "TCGTEST",
-                    URLEncoder.encode(mCardItem.getSet(), "utf-8"),
-                    URLEncoder.encode(mCardItem.getName(), "utf-8"));
+            url = String.format(getActivity().getString(R.string.card_price_url_format),
+                    getActivity().getString(R.string.card_price_url_code),
+                    URLEncoder.encode(mCardItem.getSet(),
+                            getActivity().getString(R.string.encode_utf8)),
+                    URLEncoder.encode(mCardItem.getName(),
+                            getActivity().getString(R.string.encode_utf8)));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -311,15 +313,20 @@ public class CardViewDetailFragment extends Fragment
 
             display.getSize(size);
 
-            // Clean this up into a function since it will probably be used more than once
-            final String imageUrl = "http://www.essentialtcg.com/images/" +
-                    mCardItem.getSetCode() + "/" +
-                    mCardItem.getImageName().replace(" ", "%20") +
-                    ".jpg";//&height=" +
-                    //String.valueOf(Util.dpToPx(getActivity(), 100));
+            final String imageUrl = CardUtil.buildImageUrl(
+                    getActivity(),
+                    mCardItem.getImageName(),
+                    mCardItem.getSetCode(),
+                    0);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mCardImageView.setTransitionName("source_" + String.valueOf(mCardItem.getId()));
+                String transitionName = String.format(
+                        getString(R.string.transition_name_format),
+                        mCardItem.getId());
+
+                Log.d(TAG, transitionName);
+
+                mCardImageView.setTransitionName(transitionName);
             }
 
             mFavoriteButton.setOnClickListener(mFavoriteClickListener);
@@ -343,7 +350,9 @@ public class CardViewDetailFragment extends Fragment
             nameTextView.setText(mCardItem.getBothNames(getActivity()));
 
             if (mCardItem.getManaCost().length() > 0) {
-                ArrayList<Integer> icons = CardUtil.parseIcons(mCardItem.getManaCost());
+                ArrayList<Integer> icons = CardUtil.parseIcons(
+                        getActivity(),
+                        mCardItem.getManaCost());
 
                 manaCostContainer.removeAllViews();
 
@@ -368,11 +377,7 @@ public class CardViewDetailFragment extends Fragment
                     try {
                         Drawable manaIconDrawable;
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            manaIconDrawable = getResources().getDrawable(iconId, null);
-                        } else {
-                            manaIconDrawable = getResources().getDrawable(iconId);
-                        }
+                        manaIconDrawable = ContextCompat.getDrawable(getActivity(), iconId);
 
                         manaCostImage.setImageDrawable(manaIconDrawable);
 
@@ -392,7 +397,7 @@ public class CardViewDetailFragment extends Fragment
 
                         manaCostContainer.addView(manaCostImage);
                     } catch (Exception ex) {
-                        Log.e("MtM", mCardItem.getManaCost());
+                        Log.e(TAG, mCardItem.getManaCost());
                     }
                 }
 
@@ -443,7 +448,8 @@ public class CardViewDetailFragment extends Fragment
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 
         if (mCardPriceTextView != null) {
-            mCardPriceTextView.setText(String.format("H: %s L: %s A: %s F: %s",
+            mCardPriceTextView.setText(String.format(
+                    getActivity().getString(R.string.card_price_format),
                     currencyFormat.format(priceItem.getHighPrice()),
                     currencyFormat.format(priceItem.getLowPrice()),
                     currencyFormat.format(priceItem.getAveragePrice()),
@@ -455,20 +461,20 @@ public class CardViewDetailFragment extends Fragment
     private class CardDetailPagerAdapter extends FragmentStatePagerAdapter {
 
         private final int NUM_TABS = 2;
-        private final RulesFragment mRulesFragment;
-        private final PrintingsFragment mPrintingsFragment;
+        private final RulingsFragment mRulingsFragment;
+        private final LegalitiesFragment mPrintingsFragment;
 
         public CardDetailPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
 
-            mRulesFragment = new RulesFragment();
-            mPrintingsFragment = new PrintingsFragment();
+            mRulingsFragment = RulingsFragment.newInstance(mCardItem.getId());
+            mPrintingsFragment = LegalitiesFragment.newInstance(mCardItem.getId());
         }
 
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                return mRulesFragment;
+                return mRulingsFragment;
             } else if (position == 1) {
                 return mPrintingsFragment;
             }
@@ -489,9 +495,9 @@ public class CardViewDetailFragment extends Fragment
         @Override
         public CharSequence getPageTitle(int position) {
             if (position == 0) {
-                return "Rulings";
+                return getActivity().getString(R.string.rules_tab_heading);
             } else if (position == 1) {
-                return "Formats";
+                return getActivity().getString(R.string.formats_tab_heading);
             }
 
             return super.getPageTitle(position);

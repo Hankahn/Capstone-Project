@@ -37,7 +37,7 @@ import java.util.ArrayList;
 public class SearchResultsRecyclerAdapter extends
         RecyclerView.Adapter<SearchResultsRecyclerAdapter.SearchResultViewHolder> {
 
-    private static final String TAG = "SearchResultsAdapter";
+    private static final String TAG = SearchResultsRecyclerAdapter.class.getSimpleName();
 
     private final Cursor mCursor;
     private int mSelectedPosition;
@@ -70,6 +70,7 @@ public class SearchResultsRecyclerAdapter extends
     @Override
     public long getItemId(int position) {
         mCursor.moveToPosition(position);
+
         return mCursor.getLong(CardLoader.Query._ID);
     }
 
@@ -93,23 +94,16 @@ public class SearchResultsRecyclerAdapter extends
             }
         }
 
-        // Clean this up into a function since it will probably be used more than once
-        String imageName = mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20");
-
-        final String imageUrl = String.format("http://www.essentialtcg.com/images/%s/%s.jpg?height=%s",
+        final String imageUrl = CardUtil.buildImageUrl(
+                mContext,
+                mCursor.getString(CardLoader.Query.IMAGE_NAME),
                 mCursor.getString(CardLoader.Query.SET_CODE),
-                imageName,
                 Util.dpToPx(mContext, 43));
         Log.d(TAG, "onBindViewHolder: " + imageUrl);
-            /*final String imageUrl = "http://www.essentialtcg.com/images/" +
-                    mCursor.getString(CardLoader.Query.SET_CODE) + "/" +
-                    mCursor.getString(CardLoader.Query.IMAGE_NAME).replace(" ", "%20") +
-                    ".jpg" *//*?cropyunits=100&cropxunits=100&crop=10,12,90,50";*//* + "?width=" +
-                    String.valueOf(Util.dpToPx(getActivity(), 50));*/
 
         if (mCursor.getString(CardLoader.Query.NAME2) != null) {
             holder.nameTextView.setText(String.format(
-                    mContext.getResources().getString(R.string.CARD_NAME_DOUBLE_SIDED),
+                    mContext.getResources().getString(R.string.card_name_double_sided),
                     mCursor.getString(CardLoader.Query.NAME),
                     mCursor.getString(CardLoader.Query.NAME2)));
         } else {
@@ -118,12 +112,13 @@ public class SearchResultsRecyclerAdapter extends
 
         try {
             int resourceId = CardUtil.parseSetRarity(
+                    mContext,
                     mCursor.getString(CardLoader.Query.SET_CODE),
                     mCursor.getString(CardLoader.Query.RARITY));
 
             try {
                 Drawable iconDrawable = ContextCompat.getDrawable(mContext, resourceId);
-                int imageHeight = Util.dpToPx(mContext, 15);//holder.typeTextView.getLineHeight();
+                int imageHeight = Util.dpToPx(mContext, 15);
                 int imageWidth = Util.calculateWidth(iconDrawable.getIntrinsicWidth(),
                         iconDrawable.getIntrinsicHeight(), imageHeight);
 
@@ -141,13 +136,12 @@ public class SearchResultsRecyclerAdapter extends
 
                 holder.setRarityTextView.setText(builder);
             } catch (Exception ex) {
-                Log.e("MtM", ex.toString());
-                holder.setRarityTextView.setText(String.format("%s %s",
+                holder.setRarityTextView.setText(String.format(mContext.getString(R.string.rarity_format),
                         mCursor.getString(CardLoader.Query.SET_CODE),
                         mCursor.getString(CardLoader.Query.RARITY).substring(0, 1)));
             }
         } catch (Exception ex) {
-            Log.d("MtM", mCursor.getString(CardLoader.Query.SET_CODE)
+            Log.d(TAG, mCursor.getString(CardLoader.Query.SET_CODE)
                     + "_" + mCursor.getString(CardLoader.Query.RARITY));
         }
 
@@ -156,21 +150,18 @@ public class SearchResultsRecyclerAdapter extends
         String manaCost = mCursor.getString(CardLoader.Query.MANA_COST);
         String secondManaCost = mCursor.getString(CardLoader.Query.MANA_COST2);
 
-        //LinearLayout manaCostContainer = holder.manaCostContainerView;
-
         if (manaCost.length() > 0) {
-            ArrayList<Integer> icons = CardUtil.parseIcons(manaCost);
+            ArrayList<Integer> icons = CardUtil.parseIcons(mContext, manaCost);
 
             ArrayList<Integer> secondIcons = null;
 
             if (secondManaCost != null && secondManaCost.length() > 0) {
-                secondIcons = CardUtil.parseIcons(secondManaCost);
+                secondIcons = CardUtil.parseIcons(mContext, secondManaCost);
             }
 
             SpannableStringBuilder builder = new SpannableStringBuilder();
 
-            int imageHeightdp = 15;//icons.size() > 5 || (secondIcons != null && secondIcons.size() > 0) ?
-            //10 : 15;
+            int imageHeightdp = 15;
 
             for (Integer iconId : icons) {
                 Drawable iconDrawable = ContextCompat.getDrawable(mContext, iconId);
@@ -181,16 +172,16 @@ public class SearchResultsRecyclerAdapter extends
                 iconDrawable.setBounds(0, 0, imageWidth, imageHeight);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    builder.append(" ", new ImageSpan(iconDrawable), 0);
+                    builder.append(mContext.getString(R.string.space), new ImageSpan(iconDrawable), 0);
                 } else {
-                    builder.append(" ");
+                    builder.append(mContext.getString(R.string.space));
                     builder.setSpan(new ImageSpan(iconDrawable),
                             builder.length() - 1, builder.length(), 0);
                 }
             }
 
             if (secondIcons != null && secondIcons.size() > 0) {
-                builder.append("/");
+                builder.append(mContext.getString(R.string.card_name_separator));
                 for (Integer iconId : secondIcons) {
                     Drawable iconDrawable = ContextCompat.getDrawable(mContext, iconId);
                     int imageHeight = Util.dpToPx(mContext, imageHeightdp);
@@ -217,29 +208,30 @@ public class SearchResultsRecyclerAdapter extends
 
         String type = mCursor.getString(CardLoader.Query.TYPE).toLowerCase();
 
-        if (type.startsWith(mContext.getString(R.string.TYPE_CREATURE_STARTS))) {
+        if (type.startsWith(mContext.getString(R.string.type_creature_starts))) {
             holder.featuredStatTextView.setText(String.format(
-                    mContext.getString(R.string.FEATURED_STAT_POWER_TOUGHNESS_FORMAT),
+                    mContext.getString(R.string.featured_stat_power_toughness_format),
                     mCursor.getString(CardLoader.Query.POWER),
                     mCursor.getString(CardLoader.Query.TOUGHNESS)));
-        } else if (type.startsWith(mContext.getString(R.string.TYPE_PLANESWALKER_STARTS))) {
+        } else if (type.startsWith(mContext.getString(R.string.type_planeswalker_starts))) {
             holder.featuredStatTextView.setText(mCursor.getString(CardLoader.Query.LOYALTY));
         } else {
-            holder.featuredStatTextView.setText(R.string.NO_FEATURED_STAT);
+            holder.featuredStatTextView.setText(R.string.no_featured_stat);
         }
 
         Glide.with(mContext)
                 .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                //.skipMemoryCache(true)
                 .dontTransform()
                 .dontAnimate()
                 .placeholder(R.mipmap.card_back)
                 .into(holder.croppedImageView);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            String transitionName = String.format("source_%s",
+            String transitionName = String.format(mContext.getString(R.string.transition_name_format),
                     mCursor.getInt(CardLoader.Query._ID));
+
+            Log.d(TAG, transitionName);
 
             holder.croppedImageView.setTransitionName(transitionName);
         }
@@ -247,7 +239,7 @@ public class SearchResultsRecyclerAdapter extends
 
     @Override
     public int getItemCount() {
-        return mCursor.getCount();
+        return mCursor != null ? mCursor.getCount() : 0;
     }
 
     public void setCurrentPosition(int position) {

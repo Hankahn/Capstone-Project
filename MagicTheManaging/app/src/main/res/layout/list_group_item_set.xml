@@ -40,7 +40,7 @@
             android:layout_gravity="center"
             android:layout_marginRight="@dimen/search_list_item_vertical_margin"
             android:layout_marginEnd="@dimen/search_list_item_vertical_margin"
-            android:contentDescription="@string/SET_ICON_DEFAULT_CONTENT_DESCRIPTION" />
+            android:contentDescription="@string/set.icon.default.content.description" />
 
         <TextView
             android:id="@+id/set_name_text_view"

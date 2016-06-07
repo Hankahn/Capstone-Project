@@ -2,7 +2,6 @@ package com.essentialtcg.magicthemanaging.ui.fragments;
 
 import android.content.DialogInterface;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -33,7 +32,7 @@ import java.util.ArrayList;
 public class SetPickerDialogFragment extends DialogFragment implements
         LoaderManager.LoaderCallbacks<Cursor>{
 
-    private final String TAG = "SetPickerDialogFragment";
+    private static final String TAG = SetPickerDialogFragment.class.getSimpleName();
 
     private final int SET_PICKER_LOADER_ID = 3;
 
@@ -96,7 +95,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.set_picker_recycler_view);
 
-        getDialog().setTitle(R.string.SET_PICKER_DIALOG_TITLE);
+        getDialog().setTitle(R.string.set_picker_dialog_title);
 
         loadData();
 
@@ -218,7 +217,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
                     if (setItem.getBlock().length() > 0) {
                         gvh.groupTextView.setText(setItem.getBlock());
                     } else {
-                        gvh.groupTextView.setText(R.string.SET_GROUP_EXPANSION_DEFAULT);
+                        gvh.groupTextView.setText(R.string.set_group_expansion_default);
                     }
                 } else {
                     gvh.groupTextView.setText(setItem.getSetType());
@@ -237,7 +236,7 @@ public class SetPickerDialogFragment extends DialogFragment implements
             }
 
             try {
-                int resourceId = CardUtil.parseSetRarity(setItem.getCode(), "Common");
+                int resourceId = CardUtil.parseSetRarity(getActivity(), setItem.getCode(), "Common");
 
                 viewHolder.setIconImageView.setContentDescription(setItem.getCode());
                 viewHolder.setIconImageView.setImageDrawable(

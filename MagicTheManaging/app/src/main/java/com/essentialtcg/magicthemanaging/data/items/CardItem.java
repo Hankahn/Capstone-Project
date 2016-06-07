@@ -77,7 +77,7 @@ public class CardItem implements Parcelable {
 
     public String getBothNames(Context context) {
         if (hasSecondCard) {
-            return String.format(context.getString(R.string.CARD_NAME_DOUBLE_SIDED),
+            return String.format(context.getString(R.string.card_name_double_sided),
                     name, secondName);
         } else {
             return name;
@@ -86,7 +86,7 @@ public class CardItem implements Parcelable {
 
     public String getBothManaCosts(Context context) {
         if(hasSecondCard && secondManaCost != null && secondManaCost.length() > 0) {
-            return String.format(context.getString(R.string.MANA_COST_WITH_SECOND_COST),
+            return String.format(context.getString(R.string.mana_cost_with_second_cost),
                     manaCost, secondManaCost);
         } else {
             return manaCost;

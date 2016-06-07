@@ -45,7 +45,7 @@ import java.util.Map;
 public class CardViewFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = "CardViewFragment";
+    private static final String TAG = CardViewFragment.class.getSimpleName();
 
     private static final int CARD_VIEW_LOADER_ID = 4;
 

@@ -16,7 +16,7 @@ import java.util.HashMap;
  */
 public class SelectionBuilder {
 
-    private static final String TAG = "SelectionBuilder";
+    private static final String TAG = SelectionBuilder.class.getSimpleName();
 
     private String mTable = null;
     private HashMap<String, String> mProjectionMap;

@@ -18,6 +18,7 @@ import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +58,7 @@ public class SearchFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>,
         SetPickerDialogFragment.SetPickerDialogFragmentListener {
 
-    private static final String TAG = "SearchFragment";
+    private static final String TAG = SearchFragment.class.getSimpleName();
 
     private static final String SEARCH_PARAMETERS_TAG = "SEARCH_PARAMETERS";
     private static final String SEARCH_RESULTS_POSITION_TAG = "SEARCH_RESULTS_POSITION";
@@ -92,7 +93,10 @@ public class SearchFragment extends Fragment
                     long itemId = mRecyclerView.getAdapter().getItemId(mCurrentPosition);
 
                     String updatedTransitionName =
-                            String.format("source_%s", String.valueOf(itemId));
+                            String.format(getActivity().getString(R.string.transition_name_format),
+                                    String.valueOf(itemId));
+
+                    Log.d(TAG, "Callback Transition Name: " + updatedTransitionName);
 
                     SearchResultsRecyclerAdapter.SearchResultViewHolder viewHolder =
                             (SearchResultsRecyclerAdapter.SearchResultViewHolder)
@@ -335,7 +339,6 @@ public class SearchFragment extends Fragment
                     if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                         fabAnimateIn(mFab);
                         mFabLayoutParams.setBehavior(new ScrollFabBehavior(getActivity(), null));
-                        //mFab.setLayoutParams(mFabLayoutParams);
                     } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                         mBottomSheet.setVisibility(View.VISIBLE);
                         mFabLayoutParams.setBehavior(null);

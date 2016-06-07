@@ -9,6 +9,7 @@ import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,7 @@ import java.util.Map;
 public class FavoritesFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = "FavoritesFragment";
+    private static final String TAG = FavoritesFragment.class.getSimpleName();
 
     private static final int FAVORITE_LOADER_ID = 2;
 
@@ -54,7 +55,10 @@ public class FavoritesFragment extends Fragment
                     long itemId = mRecyclerView.getAdapter().getItemId(mCurrentPosition);
 
                     String updatedTransitionName =
-                            String.format("source_%s", String.valueOf(itemId));
+                            String.format(getActivity().getString(R.string.transition_name_format),
+                                    String.valueOf(itemId));
+
+                    Log.d(TAG, "Callback Transition Name: " + updatedTransitionName);
 
                     SearchResultsRecyclerAdapter.SearchResultViewHolder viewHolder =
                             (SearchResultsRecyclerAdapter.SearchResultViewHolder)
