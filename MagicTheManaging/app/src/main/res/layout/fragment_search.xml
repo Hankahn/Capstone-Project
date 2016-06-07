@@ -98,7 +98,7 @@
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
         android:src="@drawable/magnify"
-        android:tint="#FFFFFF"
+        android:tint="@color/white"
         android:contentDescription="@string/search.for.cards"
         app:layout_behavior=".behaviors.ScrollFabBehavior"
         app:layout_anchor="@id/card_recycler_view"

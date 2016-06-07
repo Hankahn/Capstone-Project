@@ -87,7 +87,7 @@
 
                                 <View
                                     android:id="@+id/card_detail_text_separator"
-                                    android:background="#000000"
+                                    android:background="@color/black"
                                     android:layout_width = "fill_parent"
                                     android:layout_height="1dp"
                                     android:layout_centerVertical ="true"
@@ -121,7 +121,7 @@
                 android:id="@+id/card_detail_price_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#DDDDDD"
+                android:background="@color/darker.gray"
                 android:padding="3dp"
                 tools:text="H: $10.00 L: $7.00 A: $8.00 F: $15.00" />
 
@@ -130,8 +130,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"
-                app:tabSelectedTextColor="#FFFFFF"
-                app:tabTextColor="#FFFFFF"
+                app:tabSelectedTextColor="@color/white"
+                app:tabTextColor="@color/white"
                 app:tabIndicatorColor="@color/colorAccent"
                 app:tabIndicatorHeight="4dp" />
 

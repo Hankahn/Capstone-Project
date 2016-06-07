@@ -11,7 +11,7 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#CCCCCC">
+        android:backgroundTint="@color/gray">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/card_detail_collapsing_toolbar_layout"
@@ -122,9 +122,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:background="@color/colorPrimary"
-                    android:elevation="5dp"
-                    app:tabSelectedTextColor="#FFFFFF"
-                    app:tabTextColor="#FFFFFF"
+                    android:elevation="@dimen/tab.layout.elevation"
+                    app:tabSelectedTextColor="@color/white"
+                    app:tabTextColor="@color/white"
                     app:tabIndicatorColor="@color/colorAccent"
                     app:tabIndicatorHeight="4dp" />
 

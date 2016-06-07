@@ -9,4 +9,5 @@
     <dimen name="SET_PICKER_SET_ICON_HEIGHT">15dp</dimen>
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="view.pager.elevation">5dp</dimen>
+    <dimen name="tab.layout.elevation">5dp</dimen>
 </resources>
