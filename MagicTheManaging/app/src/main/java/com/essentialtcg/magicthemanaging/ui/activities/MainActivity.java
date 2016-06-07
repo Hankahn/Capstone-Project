@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener,
         LoadCardDetailCallback {
 
-    private final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RC_SIGN_IN = 9001;
 
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity
 
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
     private ImageView mHeaderUserPicture;
     private TextView mHeaderUserName;
     private TextView mHeaderUserEmail;
@@ -106,8 +107,8 @@ public class MainActivity extends AppCompatActivity
 
                                 SetArrayList setFilter = new SetArrayList();
                                 SetItem setItem = new SetItem();
-                                setItem.setName("Oath of the Gatewatch");
-                                setItem.setCode("OGW");
+                                setItem.setName(getString(R.string.start_set_name));
+                                setItem.setCode(getString(R.string.start_set_code));
                                 setFilter.add(setItem);
 
                                 cardSearchParameters.setSetFilter(setFilter);
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity
                             mFragment = new FavoritesFragment();
 
                             if (getResources().getBoolean(R.bool.multipane)) {
-                                mToolbar.setSubtitle("Favorites");
+                                mToolbar.setSubtitle(R.string.favorites_sub_title);
 
                                 CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, null);
 
@@ -163,13 +164,13 @@ public class MainActivity extends AppCompatActivity
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coord);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        View navigationHeader = navigationView.getHeaderView(0);
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        View navigationHeader = mNavigationView.getHeaderView(0);
         mHeaderUserPicture = (ImageView) navigationHeader.findViewById(R.id.header_user_picture);
         mHeaderUserName = (TextView) navigationHeader.findViewById(R.id.header_user_name);
         mHeaderUserEmail = (TextView) navigationHeader.findViewById(R.id.header_user_email);
 
-        navigationView.setNavigationItemSelectedListener(mNavigationItemSelectedListener);
+        mNavigationView.setNavigationItemSelectedListener(mNavigationItemSelectedListener);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
                 R.string.drawer_open, R.string.drawer_close);
@@ -178,6 +179,26 @@ public class MainActivity extends AppCompatActivity
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+        /*if (getIntent().hasExtra("LOAD_FAVORITES")) {
+            mFragment = new FavoritesFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, mFragment, "FavoritesFragment")
+                    .commit();
+
+            mToolbar.setSubtitle(R.string.favorites_sub_title);
+
+            navigationView.getMenu().getItem(0).setChecked(true);
+
+            if (getResources().getBoolean(R.bool.multipane)) {
+                CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, null);
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container_right, cardViewFragment, "CardViewFragment")
+                        .commit();
+            }
+        }*/
+
         if (savedInstanceState == null) {
             mFragment = new SearchFragment();
 
@@ -185,9 +206,9 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.fragment_container, mFragment, "SearchFragment")
                     .commit();
 
-            mToolbar.setSubtitle("Search Results");
+            mToolbar.setSubtitle(R.string.search_results_sub_title);
 
-            navigationView.getMenu().getItem(0).setChecked(true);
+            mNavigationView.getMenu().getItem(0).setChecked(true);
 
             if (getResources().getBoolean(R.bool.multipane)) {
                 // TODO: Pull this from the sharedpreferences instead
@@ -195,8 +216,8 @@ public class MainActivity extends AppCompatActivity
 
                 SetArrayList setFilter = new SetArrayList();
                 SetItem setItem = new SetItem();
-                setItem.setName("Oath of the Gatewatch");
-                setItem.setCode("OGW");
+                setItem.setName(getString(R.string.start_set_name));
+                setItem.setCode(getString(R.string.start_set_code));
                 setFilter.add(setItem);
 
                 cardSearchParameters.setSetFilter(setFilter);
@@ -216,6 +237,29 @@ public class MainActivity extends AppCompatActivity
             } else if (currentFragment.getClass().equals(FavoritesFragment.class)) {
                 mFragment = currentFragment;
             }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        mFragment = new FavoritesFragment();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, mFragment, "FavoritesFragment")
+                .commit();
+
+        mToolbar.setSubtitle(R.string.favorites_sub_title);
+
+        mNavigationView.getMenu().getItem(0).setChecked(true);
+
+        if (getResources().getBoolean(R.bool.multipane)) {
+            CardViewFragment cardViewFragment = CardViewFragment.newInstance(0, 0, null);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container_right, cardViewFragment, "CardViewFragment")
+                    .commit();
         }
     }
 
@@ -306,7 +350,7 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        boolean loggedIn = preferences.getBoolean("PREF_LOGGED_IN", false);
+        boolean loggedIn = preferences.getBoolean(getString(R.string.pref_logged_in), false);
 
         mSignInMenuItem.setVisible(!loggedIn);
         mSignOutMenuItem.setVisible(loggedIn);
@@ -331,8 +375,8 @@ public class MainActivity extends AppCompatActivity
                 signOut();
 
                 return true;
-            case R.id.action_settings:
-                return true;
+            /*case R.id.action_settings:
+                return true;*/
         }
 
         return super.onOptionsItemSelected(item);
@@ -367,15 +411,15 @@ public class MainActivity extends AppCompatActivity
 
             loggedIn = true;
 
-            editor.putBoolean("PREF_LOGGED_IN", true);
-            editor.putString("PREF_LOGGED_IN_ID", account.getId());
-            editor.putString("PREF_LOGGED_IN_NAME", account.getDisplayName());
-            editor.putString("PREF_LOGGED_IN_EMAIL", account.getEmail());
+            editor.putBoolean(getString(R.string.pref_logged_in), true);
+            editor.putString(getString(R.string.pref_logged_in_id), account.getId());
+            editor.putString(getString(R.string.pref_logged_in_name), account.getDisplayName());
+            editor.putString(getString(R.string.pref_logged_in_email), account.getEmail());
 
             if (account.getPhotoUrl() != null) {
-                editor.putString("PREF_PROFILE_IMAGE_URL", account.getPhotoUrl().toString());
+                editor.putString(getString(R.string.pref_profile_image_url), account.getPhotoUrl().toString());
             } else {
-                editor.putString("PREF_PROFILE_IMAGE_URL", "");
+                editor.putString(getString(R.string.pref_profile_image_url), "");
             }
 
             mHeaderUserPicture.setVisibility(View.VISIBLE);
@@ -397,17 +441,17 @@ public class MainActivity extends AppCompatActivity
 
             if (mSigningInOut) {
                 Snackbar.make(mCoordinatorLayout,
-                        "Successfully Logged In", Snackbar.LENGTH_SHORT).show();
+                        R.string.signed_out_message, Snackbar.LENGTH_SHORT).show();
                 mSigningInOut = false;
             }
         } else {
             loggedIn = false;
 
-            editor.putBoolean("PREF_LOGGED_IN", false);
-            editor.putString("PREF_LOGGED_IN_ID", "");
-            editor.putString("PREF_LOGGED_IN_NAME", "");
-            editor.putString("PREF_LOGGED_IN_EMAIL", "");
-            editor.putString("PREF_PROFILE_IMAGE_URL", "");
+            editor.putBoolean(getString(R.string.pref_logged_in), false);
+            editor.putString(getString(R.string.pref_logged_in_id), "");
+            editor.putString(getString(R.string.pref_logged_in_name), "");
+            editor.putString(getString(R.string.pref_logged_in_email), "");
+            editor.putString(getString(R.string.pref_profile_image_url), "");
 
             mHeaderUserPicture.setVisibility(View.INVISIBLE);
             mHeaderUserName.setVisibility(View.INVISIBLE);
@@ -415,7 +459,7 @@ public class MainActivity extends AppCompatActivity
 
             if (mSigningInOut) {
                 Snackbar.make(mCoordinatorLayout,
-                        "Successfully Logged Out", Snackbar.LENGTH_SHORT).show();
+                        R.string.logged_out_message, Snackbar.LENGTH_SHORT).show();
                 mSigningInOut = false;
             }
         }
@@ -485,7 +529,7 @@ public class MainActivity extends AppCompatActivity
                                 transitionView.getTransitionName())
                         .toBundle();
 
-                Log.d("MtMT", transitionView.getTransitionName() + " -> " +
+                Log.d(TAG, transitionView.getTransitionName() + " -> " +
                         transitionView.getTransitionName());
             }
 
