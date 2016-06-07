@@ -106,9 +106,12 @@ public class SearchResultsRecyclerAdapter extends
                     mContext.getResources().getString(R.string.card_name_double_sided),
                     mCursor.getString(CardLoader.Query.NAME),
                     mCursor.getString(CardLoader.Query.NAME2)));
+
         } else {
             holder.nameTextView.setText(mCursor.getString(CardLoader.Query.NAME));
         }
+
+        holder.croppedImageView.setContentDescription(holder.nameTextView.getText());
 
         try {
             int resourceId = CardUtil.parseSetRarity(
@@ -226,6 +229,7 @@ public class SearchResultsRecyclerAdapter extends
                 .dontAnimate()
                 .placeholder(R.mipmap.card_back)
                 .into(holder.croppedImageView);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String transitionName = String.format(mContext.getString(R.string.transition_name_format),

@@ -340,6 +340,8 @@ public class CardViewDetailFragment extends Fragment
 
             nameTextView.setText(mCardItem.getBothNames(getActivity()));
 
+            mCardImageView.setContentDescription(nameTextView.getText());
+
             if (mCardItem.getManaCost().length() > 0) {
                 ArrayList<Integer> icons = CardUtil.parseIcons(
                         getActivity(),
