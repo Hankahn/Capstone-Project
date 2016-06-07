@@ -1,5 +1,6 @@
 package com.essentialtcg.magicthemanaging.utils;
 
+import android.content.Context;
 import android.util.Log;
 import android.util.Xml;
 
@@ -18,9 +19,9 @@ import java.util.regex.Pattern;
  */
 public class CardUtil {
 
-    private static final String TAG = "CardUtil";
+    private static final String TAG = CardUtil.class.getSimpleName();
 
-    public static int parseSetRarity(String setCode, String rarity) {
+    public static int parseSetRarity(Context context, String setCode, String rarity) {
         String setCodeFixed = setCode.toLowerCase();
         String rarityFixed = rarity.toLowerCase().replace(" ", "").substring(0, 1);
 
@@ -31,12 +32,12 @@ public class CardUtil {
             setCodeFixed = "c" + setCodeFixed;
         }
 
-        String resId = String.format("%s_%s", setCodeFixed, rarityFixed);
+        String resId = String.format(context.getString(R.string.set_icon_format), setCodeFixed, rarityFixed);
 
         return Util.getResId(resId, R.mipmap.class);
     }
 
-    public static ArrayList<Integer> parseIcons(String text) {
+    public static ArrayList<Integer> parseIcons(Context context, String text) {
         ArrayList<Integer> iconsIds = new ArrayList<>();
 
         Pattern iconFinder = Pattern.compile("\\{(.*?)\\}");
@@ -152,9 +153,11 @@ public class CardUtil {
                     break;
                 default:
                     iconsIds.add(Util.getResId(
-                            String.format("mana_%s", iconMatcher.group(1).toLowerCase()),
+                            String.format(context.getString(R.string.mana_icon_format),
+                                    iconMatcher.group(1).toLowerCase()),
                             R.drawable.class));
-                    Log.d("MtM", String.format("mana_%s", iconMatcher.group(1).toLowerCase()));
+                    Log.d(TAG, String.format(context.getString(R.string.mana_icon_format),
+                            iconMatcher.group(1).toLowerCase()));
             }
         }
 
@@ -204,6 +207,18 @@ public class CardUtil {
         }
 
         return priceItem;
+    }
+
+    public static String buildImageUrl(Context context, String imageName, String setCode, int height) {
+        String imageBaseUrl = context.getString(R.string.image_base_url);
+        return String.format(context.getString(R.string.card_image_url_format),
+                imageBaseUrl,
+                setCode,
+                imageName.replace(
+                        context.getString(R.string.space),
+                        context.getString(R.string.space_encoded)),
+                height > 0 ? String.format(
+                        context.getString(R.string.card_image_url_height_parameter), height) : "");
     }
 
 }
