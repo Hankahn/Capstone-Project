@@ -56,4 +56,5 @@
     <string name="encode.utf8">utf-8</string>
     <string name="add.to.favorites">Add to favorites</string>
     <string name="remove.from.favorites">Remove from favorites</string>
+    <string name="search.for.cards">Search for cards</string>
 </resources>
