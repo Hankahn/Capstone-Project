@@ -1,5 +1,6 @@
 package com.essentialtcg.magicthemanaging.ui.widgets;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -11,6 +12,7 @@ import android.widget.RemoteViews;
 
 import com.essentialtcg.magicthemanaging.R;
 import com.essentialtcg.magicthemanaging.services.FavoritesWidgetService;
+import com.essentialtcg.magicthemanaging.ui.activities.MainActivity;
 
 /**
  * Created by Shawn on 5/31/2016.
@@ -29,6 +31,11 @@ public class FavoritesWidget extends AppWidgetProvider {
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
 
             remoteViews.setRemoteAdapter(R.id.favorites_list_view, intent);
+
+            Intent mainIntent = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, mainIntent, 0);
+
+            remoteViews.setOnClickPendingIntent(R.id.widget_frame_layout, pendingIntent);
 
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
